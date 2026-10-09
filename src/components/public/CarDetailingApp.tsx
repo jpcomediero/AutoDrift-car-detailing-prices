@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Sparkles, Shield, Wrench, RefreshCw, Lock } from "lucide-react";
+import { Sparkles, Shield, RefreshCw, Lock } from "lucide-react";
 import Link from "next/link";
 import { CarSizeType, ServiceType, ComboType, PublicPricingData } from "@/types";
 import { StepProgress } from "./StepProgress";
@@ -10,14 +10,15 @@ import { Step2CarName } from "./Step2CarName";
 import { Step3TypeSelection } from "./Step3TypeSelection";
 import { Step4Services } from "./Step4Services";
 import { Step4Combos } from "./Step4Combos";
-import { QuoteSummary, SelectedQuoteItem } from "./QuoteSummary";
+import { Step5QuoteSummary } from "./Step5QuoteSummary";
+import type { SelectedQuoteItem } from "./QuoteSummary";
 import { isSaleActive } from "@/lib/utils";
 
 export function CarDetailingApp() {
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<PublicPricingData | null>(null);
 
-  // Stepper state
+  // Stepper state: 1 (Size), 2 (Vehicle), 3 (Type), 4 (Services/Combos), 5 (Quote Summary)
   const [currentStep, setCurrentStep] = useState<number>(1);
 
   // User selections
@@ -123,6 +124,12 @@ export function CarDetailingApp() {
     logAnalytics("SELECT", "COMBO", combo.id);
   };
 
+  // Step 4 -> Step 5: Proceed to final quote summary
+  const handleProceedToSummary = () => {
+    setCurrentStep(5);
+    logAnalytics("VIEW_SUMMARY", "SUMMARY", selectedSize?.id);
+  };
+
   // Navigation: Back button
   const handleBack = () => {
     if (currentStep > 1) {
@@ -220,14 +227,14 @@ export function CarDetailingApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#090d16] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4">
         <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-cyan-500/20 border-t-cyan-400 animate-spin" />
+          <div className="w-16 h-16 rounded-full border-4 border-red-600/20 border-t-red-600 animate-spin" />
           <div className="absolute inset-0 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-cyan-400 animate-pulse" />
+            <Sparkles className="w-6 h-6 text-red-500 animate-pulse" />
           </div>
         </div>
-        <p className="mt-4 text-sm font-semibold text-slate-300 tracking-wide uppercase">
+        <p className="mt-4 text-sm font-semibold text-zinc-300 tracking-wider uppercase">
           Loading AutoDrift Pricing Engine...
         </p>
       </div>
@@ -239,53 +246,52 @@ export function CarDetailingApp() {
   const combos = data?.combos || [];
 
   return (
-    <div className="min-h-screen bg-[#090d16] flex flex-col text-slate-100">
+    <div className="min-h-screen bg-[#050505] flex flex-col text-zinc-100">
       {/* ============================================================== */}
-      {/* BRAND TOP BAR                                                  */}
-      {/* ============================================================== */}
-      <header className="border-b border-slate-800/80 bg-slate-950/70 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.5)]">
-              <Sparkles className="w-5 h-5 text-black stroke-[2.5]" />
+      {/* BRAND TOP BAR */}
+      <header className="border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md sticky top-0 z-40">
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0">
+              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
             </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="text-lg font-black tracking-wider text-white">
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <span className="text-base sm:text-lg font-black tracking-wider text-white">
                   AUTODRIFT
                 </span>
-                <span className="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
-                  Detailing Studio
+                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-red-600/20 text-red-500 border border-red-600/40 shrink-0">
+                  Studio
                 </span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium">
-                Live Pricing &amp; Custom Quote Calculator
+              <p className="text-[10px] sm:text-[11px] text-zinc-400 font-medium truncate">
+                Live Pricing Calculator
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button
               onClick={loadData}
               title="Refresh live pricing from database"
-              className="p-2 text-slate-400 hover:text-cyan-400 hover:bg-slate-900 rounded-lg transition-colors border border-transparent hover:border-slate-800"
+              className="p-1.5 sm:p-2 text-zinc-400 hover:text-red-500 hover:bg-zinc-900 rounded-lg transition-colors border border-transparent hover:border-zinc-800"
               aria-label="Refresh pricing"
             >
-              <RefreshCw className="w-4 h-4" />
+              <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </button>
             <Link
               href="/admin/login"
-              className="flex items-center gap-1.5 text-xs text-slate-400 hover:text-white px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 transition-colors"
+              className="flex items-center gap-1 sm:gap-1.5 text-xs text-zinc-400 hover:text-white px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 hover:border-zinc-700 transition-colors"
             >
-              <Lock className="w-3.5 h-3.5 text-slate-400" />
-              <span>Admin</span>
+              <Lock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-zinc-400" />
+              <span className="hidden xs:inline">Admin</span>
             </Link>
           </div>
         </div>
       </header>
 
       {/* ============================================================== */}
-      {/* STEP PROGRESS NAVIGATION                                       */}
+      {/* STEP PROGRESS NAVIGATION (5 STEPS)                             */}
       {/* ============================================================== */}
       <StepProgress
         currentStep={currentStep}
@@ -295,87 +301,90 @@ export function CarDetailingApp() {
       />
 
       {/* ============================================================== */}
-      {/* MAIN STEP CONTAINER WITH RESPONSIVE QUOTE PANEL               */}
+      {/* MAIN STEP CONTAINER                                            */}
       {/* ============================================================== */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 py-4 sm:py-6">
-        <div className="flex flex-col lg:flex-row gap-6 items-start">
-          {/* Main Step Flow Area */}
-          <div className="flex-1 w-full min-w-0 pb-24 lg:pb-8">
-            {/* STEP 1: CHOOSE SIZE */}
-            {currentStep === 1 && (
-              <Step1CarSize
-                sizes={sizes}
-                selectedSizeId={selectedSize?.id || null}
-                onSelectSize={handleSelectSize}
-              />
-            )}
-
-            {/* STEP 2: CAR NAME + CLAUDE AI RECOMMENDATION */}
-            {currentStep === 2 && selectedSize && (
-              <Step2CarName
-                selectedSize={selectedSize}
-                sizes={sizes}
-                initialCarName={carName}
-                onConfirm={handleConfirmCarName}
-                onSkip={handleSkipCarName}
-              />
-            )}
-
-            {/* STEP 3: TYPE SELECTION (NORMAL VS COMBO) */}
-            {currentStep === 3 && (
-              <Step3TypeSelection
-                selectedType={selectedType}
-                onSelectType={handleSelectType}
-                serviceCount={services.length}
-                comboCount={combos.length}
-              />
-            )}
-
+        {currentStep === 5 ? (
+          /* STEP 5: DEDICATED FULL-PAGE QUOTE SUMMARY */
+          <Step5QuoteSummary
+            selectedSize={selectedSize}
+            carName={carName}
+            items={quoteItems}
+            onRemoveItem={handleRemoveItem}
+            onModify={() => setCurrentStep(4)}
+            onStartOver={handleStartOver}
+          />
+        ) : currentStep === 1 ? (
+          /* STEP 1: FULL-WIDTH CENTERED CAR SIZE SELECTION */
+          <div className="w-full pb-16">
+            <Step1CarSize
+              sizes={sizes}
+              selectedSizeId={selectedSize?.id || null}
+              onSelectSize={handleSelectSize}
+            />
+          </div>
+        ) : currentStep === 2 && selectedSize ? (
+          /* STEP 2: FULL-WIDTH CENTERED VEHICLE NAME + GEMINI AI */
+          <div className="w-full pb-16">
+            <Step2CarName
+              selectedSize={selectedSize}
+              sizes={sizes}
+              initialCarName={carName}
+              onConfirm={handleConfirmCarName}
+              onSkip={handleSkipCarName}
+            />
+          </div>
+        ) : currentStep === 3 ? (
+          /* STEP 3: FULL-WIDTH CENTERED TYPE SELECTION */
+          <div className="w-full pb-16">
+            <Step3TypeSelection
+              selectedType={selectedType}
+              onSelectType={handleSelectType}
+              serviceCount={services.length}
+              comboCount={combos.length}
+            />
+          </div>
+        ) : (
+          /* STEP 4: FULL-WIDTH CENTERED SERVICES & COMBOS */
+          <div className="w-full pb-20">
             {/* STEP 4A: NORMAL SERVICES LIST */}
-            {currentStep === 4 && selectedType === "NORMAL" && selectedSize && (
+            {selectedType === "NORMAL" && selectedSize && (
               <Step4Services
                 services={services}
                 selectedSize={selectedSize}
                 selectedServiceIds={selectedServiceIds}
                 onToggleService={handleToggleService}
+                onProceedToSummary={handleProceedToSummary}
               />
             )}
 
             {/* STEP 4B: COMBO PACKAGES LIST */}
-            {currentStep === 4 && selectedType === "COMBO" && selectedSize && (
+            {selectedType === "COMBO" && selectedSize && (
               <Step4Combos
                 combos={combos}
                 allServices={services}
                 selectedSize={selectedSize}
                 selectedComboId={selectedComboId}
                 onSelectCombo={handleSelectCombo}
+                onProceedToSummary={handleProceedToSummary}
               />
             )}
           </div>
-
-          {/* QUOTE SUMMARY PANEL (Side panel on desktop / Sticky bottom sheet on mobile) */}
-          <QuoteSummary
-            selectedSize={selectedSize}
-            carName={carName}
-            items={quoteItems}
-            onRemoveItem={handleRemoveItem}
-            onClearAll={handleClearAll}
-          />
-        </div>
+        )}
       </main>
 
       {/* ============================================================== */}
       {/* FOOTER                                                         */}
       {/* ============================================================== */}
-      <footer className="border-t border-slate-900 bg-slate-950/80 py-6 px-4 text-center text-xs text-slate-400 mt-auto">
+      <footer className="border-t border-zinc-900 bg-zinc-950/90 py-6 px-4 text-center text-xs text-zinc-500 mt-auto">
         <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Shield className="w-4 h-4 text-cyan-400" />
-            <span className="text-slate-400">
-              AutoDrift Studio &bull; Premium Ceramic Coating &amp; Paint Correction
+            <Shield className="w-4 h-4 text-red-500" />
+            <span className="text-zinc-400">
+              AutoDrift Studio &bull; Precision Detailing &amp; Paint Protection
             </span>
           </div>
-          <p className="text-slate-400">
+          <p className="text-zinc-500">
             Real-time live prices &bull; No booking required for instant estimate
           </p>
         </div>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { recommendCarSize, AvailableSize } from "@/lib/anthropic";
+import { recommendCarSize, AvailableSize } from "@/lib/gemini";
 
 export const dynamic = "force-dynamic";
 

@@ -76,36 +76,36 @@ export function Step2CarName({
     result.recommendedSize.toLowerCase() !== selectedSize.name.toLowerCase();
 
   return (
-    <div className="w-full max-w-xl mx-auto px-4 py-8">
+    <div className="w-full max-w-xl sm:max-w-2xl mx-auto px-4 py-8">
       {/* Header */}
       <div className="text-center mb-8">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 mb-3 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-          Step 2 of 4
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-red-600/10 text-red-500 border border-red-600/30 mb-3 shadow-[0_0_15px_rgba(239,68,68,0.2)] uppercase tracking-wider">
+          Step 2 of 5
         </span>
         <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
           What car do you drive?
         </h2>
-        <p className="text-slate-400 text-sm mt-2">
+        <p className="text-zinc-400 text-sm mt-2">
           Currently selected size:{" "}
-          <span className="font-semibold text-cyan-300 bg-cyan-950/60 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
+          <span className="font-bold text-red-400 bg-red-950/50 px-2.5 py-0.5 rounded-full border border-red-600/40">
             {selectedSize.name}
           </span>
         </p>
       </div>
 
       {/* Input Card */}
-      <div className="glass-card rounded-2xl p-6 sm:p-7 border border-slate-800">
+      <div className="glass-card rounded-2xl p-6 sm:p-7 border border-zinc-800">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label
               htmlFor="car-name-input"
-              className="block text-sm font-medium text-slate-300 mb-2 flex items-center justify-between"
+              className="block text-sm font-semibold text-zinc-200 mb-2 flex items-center justify-between"
             >
               <span className="flex items-center gap-1.5">
-                <Car className="w-4 h-4 text-cyan-400" />
-                Car Make & Model
+                <Car className="w-4 h-4 text-red-500" />
+                Car Make &amp; Model
               </span>
-              <span className="text-xs text-slate-500">e.g., Year, Brand, Model</span>
+              <span className="text-xs text-zinc-500">e.g., Year, Brand, Model</span>
             </label>
             <div className="relative">
               <input
@@ -117,28 +117,28 @@ export function Step2CarName({
                   if (hasValidated) setHasValidated(false);
                 }}
                 placeholder="e.g., Toyota Fortuner 2022"
-                className="w-full px-4 py-3.5 bg-slate-950/80 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-base transition-all"
+                className="w-full px-4 py-3.5 bg-black/90 border border-zinc-700/90 focus:border-red-500 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-base transition-all"
                 autoFocus
               />
             </div>
           </div>
 
           {!hasValidated && (
-            <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2">
               <button
                 type="submit"
                 disabled={isLoading || !carName.trim()}
-                className="w-full sm:flex-1 flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-semibold text-black bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(6,182,212,0.35)] transition-all duration-200 active:scale-[0.98]"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all duration-200 active:scale-[0.98] whitespace-nowrap shrink-0"
               >
                 {isLoading ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin text-black" />
-                    <span>Analyzing with Claude AI...</span>
+                    <Loader2 className="w-4 h-4 animate-spin text-white shrink-0" />
+                    <span className="whitespace-nowrap">Analyzing with Gemini AI...</span>
                   </>
                 ) : (
                   <>
-                    <Sparkles className="w-4 h-4 text-black" />
-                    <span>Verify Car Size</span>
+                    <Sparkles className="w-4 h-4 text-white shrink-0" />
+                    <span className="whitespace-nowrap">Verify Car Size</span>
                   </>
                 )}
               </button>
@@ -146,9 +146,9 @@ export function Step2CarName({
               <button
                 type="button"
                 onClick={() => onConfirm(carName.trim() || selectedSize.name, selectedSize)}
-                className="w-full sm:w-auto px-4 py-3 text-xs sm:text-sm text-slate-400 hover:text-slate-200 transition-colors"
+                className="w-full sm:w-auto px-4 py-3 text-xs sm:text-sm text-zinc-400 hover:text-white transition-colors whitespace-nowrap text-center"
               >
-                Skip verification & continue
+                <span className="whitespace-nowrap">Proceed with {selectedSize.name} without verification &rarr;</span>
               </button>
             </div>
           )}
@@ -156,17 +156,17 @@ export function Step2CarName({
 
         {/* Validation Feedback States */}
         {hasValidated && result && (
-          <div className="mt-6 pt-6 border-t border-slate-800/80 animate-in fade-in duration-300">
+          <div className="mt-6 pt-6 border-t border-zinc-800 animate-in fade-in duration-300">
             {/* Condition 1: Perfect Match */}
             {isMatch && (
-              <div className="rounded-xl p-4 bg-emerald-950/40 border border-emerald-500/40 text-emerald-200">
+              <div className="rounded-xl p-4 bg-zinc-900/90 border border-red-500/50 text-zinc-200">
                 <div className="flex items-start gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <CheckCircle2 className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-emerald-300 text-sm sm:text-base">
+                    <h4 className="font-bold text-white text-sm sm:text-base">
                       Confirmed! Perfect size match.
                     </h4>
-                    <p className="text-xs sm:text-sm text-emerald-200/90 mt-1">
+                    <p className="text-xs sm:text-sm text-zinc-300 mt-1">
                       {result.reason || `${carName} matches your selected size (${selectedSize.name}).`}
                     </p>
                   </div>
@@ -174,9 +174,9 @@ export function Step2CarName({
                 <button
                   type="button"
                   onClick={() => onConfirm(carName, selectedSize)}
-                  className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-sm shadow-[0_0_15px_rgba(16,185,129,0.3)] transition-all active:scale-95"
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold text-sm shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95"
                 >
-                  <span>Continue to Packages</span>
+                  <span>Confirm &amp; Continue to Step 3</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
@@ -184,22 +184,22 @@ export function Step2CarName({
 
             {/* Condition 2: Recommendation Differs from Selected Size */}
             {isMismatch && (
-              <div className="rounded-xl p-4 bg-amber-950/40 border border-amber-500/40 text-amber-200">
+              <div className="rounded-xl p-4 bg-zinc-900/90 border border-red-500/60 text-zinc-200">
                 <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                  <AlertTriangle className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="font-bold text-amber-300 text-sm sm:text-base">
+                    <h4 className="font-bold text-red-400 text-sm sm:text-base">
                       Size Recommendation Suggestion
                     </h4>
-                    <p className="text-xs sm:text-sm text-amber-200/90 mt-1">
+                    <p className="text-xs sm:text-sm text-zinc-300 mt-1">
                       Your <span className="font-semibold text-white">{carName}</span> is usually classified as{" "}
-                      <span className="font-bold text-amber-300 bg-amber-950/70 px-2 py-0.5 rounded border border-amber-500/30">
+                      <span className="font-bold text-white bg-red-950/80 px-2 py-0.5 rounded border border-red-500/50">
                         {result.recommendedSize}
                       </span>
                       . Switch to {result.recommendedSize}?
                     </p>
                     {result.reason && (
-                      <p className="text-xs text-amber-300/80 mt-1 italic">&ldquo;{result.reason}&rdquo;</p>
+                      <p className="text-xs text-zinc-400 mt-1 italic">&ldquo;{result.reason}&rdquo;</p>
                     )}
                   </div>
                 </div>
@@ -208,18 +208,18 @@ export function Step2CarName({
                   <button
                     type="button"
                     onClick={() => onConfirm(carName, recommendedSizeObj)}
-                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-lg bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 text-black font-bold text-xs sm:text-sm shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all active:scale-95"
+                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs sm:text-sm shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95 whitespace-nowrap"
                   >
-                    <ShieldCheck className="w-4 h-4 text-black" />
-                    <span>Use recommended ({result.recommendedSize})</span>
+                    <ShieldCheck className="w-4 h-4 text-white shrink-0" />
+                    <span className="whitespace-nowrap">Use recommended ({result.recommendedSize})</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => onConfirm(carName, selectedSize)}
-                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition-all active:scale-95"
+                    className="flex items-center justify-center gap-1.5 py-3 px-4 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-medium text-xs sm:text-sm border border-zinc-700 transition-all active:scale-95 whitespace-nowrap"
                   >
-                    <span>Keep my selection ({selectedSize.name})</span>
+                    <span className="whitespace-nowrap">Keep my selection ({selectedSize.name})</span>
                   </button>
                 </div>
               </div>
@@ -227,14 +227,14 @@ export function Step2CarName({
 
             {/* Condition 3: Not Recognized or API Error (Never block flow) */}
             {!isMatch && !isMismatch && (
-              <div className="rounded-xl p-4 bg-slate-900 border border-slate-700 text-slate-300">
+              <div className="rounded-xl p-4 bg-zinc-900 border border-zinc-700 text-zinc-300">
                 <div className="flex items-start gap-3">
-                  <Car className="w-5 h-5 text-cyan-400 shrink-0 mt-0.5" />
+                  <Car className="w-5 h-5 text-red-400 shrink-0 mt-0.5" />
                   <div>
                     <h4 className="font-semibold text-white text-sm sm:text-base">
                       Ready to continue!
                     </h4>
-                    <p className="text-xs sm:text-sm text-slate-400 mt-1">
+                    <p className="text-xs sm:text-sm text-zinc-400 mt-1">
                       {result.reason || "We will apply pricing for your selected size: " + selectedSize.name}
                     </p>
                   </div>
@@ -242,10 +242,10 @@ export function Step2CarName({
                 <button
                   type="button"
                   onClick={() => onConfirm(carName || selectedSize.name, selectedSize)}
-                  className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-5 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-sm shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all active:scale-95"
+                  className="mt-4 w-full flex items-center justify-center gap-2 py-3.5 px-5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-bold text-sm shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95 whitespace-nowrap"
                 >
-                  <span>Continue with {selectedSize.name}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span className="whitespace-nowrap">Confirm &amp; Continue with {selectedSize.name}</span>
+                  <ArrowRight className="w-4 h-4 shrink-0" />
                 </button>
               </div>
             )}

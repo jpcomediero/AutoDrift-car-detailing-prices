@@ -23,7 +23,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#090d16",
+  themeColor: "#050505",
 };
 
 export default function RootLayout({
@@ -33,7 +33,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark">
-      <body className={`${inter.className} bg-[#090d16] text-slate-100 antialiased selection:bg-cyan-500 selection:text-black`}>
+      <body className={`${inter.className} bg-[#050505] text-zinc-100 antialiased selection:bg-red-600 selection:text-white`}>
         {children}
       </body>
     </html>

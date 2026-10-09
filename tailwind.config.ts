@@ -11,27 +11,27 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          50: "#ecfeff",
-          100: "#cffafe",
-          200: "#a5f3fc",
-          300: "#67e8f9",
-          400: "#22d3ee",
-          500: "#06b6d4",
-          600: "#0891b2",
-          700: "#0e7490",
-          800: "#155e75",
-          900: "#164e63",
-          950: "#083344",
-          accent: "#00e5ff",
-          electric: "#38bdf8",
+          50: "#fef2f2",
+          100: "#fee2e2",
+          200: "#fecaca",
+          300: "#fca5a5",
+          400: "#f87171",
+          500: "#ef4444",
+          600: "#dc2626",
+          700: "#b91c1c",
+          800: "#991b1b",
+          900: "#7f1d1d",
+          950: "#450a0a",
+          accent: "#ff1a24",
+          electric: "#ef4444",
         },
         dark: {
-          bg: "#090d16",
-          card: "#0f172a",
-          cardHover: "#162036",
-          surface: "#1e293b",
-          border: "#334155",
-          borderLight: "#475569",
+          bg: "#050505",
+          card: "#0f0f0f",
+          cardHover: "#171717",
+          surface: "#1f1f1f",
+          border: "#292929",
+          borderLight: "#3d3d3d",
         },
       },
       backgroundImage: {
@@ -39,12 +39,12 @@ const config: Config = {
         "glossy-card":
           "linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%)",
         "glossy-glow":
-          "radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.15) 0%, transparent 70%)",
+          "radial-gradient(circle at 50% 0%, rgba(239, 68, 68, 0.18) 0%, transparent 70%)",
       },
       boxShadow: {
-        glow: "0 0 25px -5px rgba(6, 182, 212, 0.4)",
-        "glow-sm": "0 0 15px -3px rgba(6, 182, 212, 0.3)",
-        glass: "0 8px 32px 0 rgba(0, 0, 0, 0.37)",
+        glow: "0 0 25px -5px rgba(239, 68, 68, 0.5)",
+        "glow-sm": "0 0 15px -3px rgba(239, 68, 68, 0.35)",
+        glass: "0 8px 32px 0 rgba(0, 0, 0, 0.6)",
       },
       keyframes: {
         shimmer: {

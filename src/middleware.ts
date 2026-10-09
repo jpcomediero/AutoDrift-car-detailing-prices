@@ -1,71 +1,45 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
-export async function middleware(request: NextRequest) {
+export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // Only protect /admin (except /admin/login) and /api/admin/*
-  const isAdminPage = pathname.startsWith("/admin") && !pathname.startsWith("/admin/login");
+  // Allow login page and auth api routes to pass through freely
+  if (
+    pathname === "/admin/login" ||
+    pathname.startsWith("/api/admin/auth/login") ||
+    pathname.startsWith("/api/admin/auth/logout")
+  ) {
+    return NextResponse.next();
+  }
+
+  // Only guard /admin and /api/admin/*
+  const isAdminPage = pathname.startsWith("/admin");
   const isAdminApi = pathname.startsWith("/api/admin");
 
   if (!isAdminPage && !isAdminApi) {
     return NextResponse.next();
   }
 
-  // Allow bypass in local dev if configured, or check Supabase session
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // Check for authentication cookies
+  // 1. Development / demo admin cookie
+  const devAdminCookie = request.cookies.get("autodrift_dev_admin")?.value;
+  const isDevAuth = devAdminCookie === "authenticated";
 
-  let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
-  });
-
-  if (!supabaseUrl || !supabaseAnonKey || supabaseUrl.includes("placeholder")) {
-    // If Supabase credentials are not configured yet, check for development admin cookie
-    const devAdminCookie = request.cookies.get("autodrift_dev_admin")?.value;
-    if (devAdminCookie === "authenticated") {
-      return response;
+  // 2. Supabase auth token cookies (e.g. sb-<project>-auth-token or sb-access-token)
+  let isSupabaseAuth = false;
+  const allCookies = request.cookies.getAll();
+  for (const c of allCookies) {
+    if (c.name.startsWith("sb-") && c.name.endsWith("-auth-token") && c.value) {
+      isSupabaseAuth = true;
+      break;
     }
-
-    if (isAdminApi) {
-      return NextResponse.json({ error: "Unauthorized admin access" }, { status: 401 });
+    if (c.name === "sb-access-token" && c.value) {
+      isSupabaseAuth = true;
+      break;
     }
-    const loginUrl = new URL("/admin/login", request.url);
-    loginUrl.searchParams.set("next", pathname);
-    return NextResponse.redirect(loginUrl);
   }
 
-  const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
-    cookies: {
-      get(name: string) {
-        return request.cookies.get(name)?.value;
-      },
-      set(name: string, value: string, options: CookieOptions) {
-        response.cookies.set({
-          name,
-          value,
-          ...options,
-        });
-      },
-      remove(name: string, options: CookieOptions) {
-        response.cookies.set({
-          name,
-          value: "",
-          ...options,
-        });
-      },
-    },
-  });
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  // Also check dev admin fallback cookie
-  const devAdminCookie = request.cookies.get("autodrift_dev_admin")?.value;
-  const isAuth = !!user || devAdminCookie === "authenticated";
+  const isAuth = isDevAuth || isSupabaseAuth;
 
   if (!isAuth) {
     if (isAdminApi) {
@@ -77,7 +51,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(loginUrl);
   }
 
-  return response;
+  return NextResponse.next();
 }
 
 export const config = {

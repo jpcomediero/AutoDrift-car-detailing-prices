@@ -15,8 +15,10 @@ import {
   Check,
 } from "lucide-react";
 import { CarSizeType } from "@/types";
+import { useToast } from "@/components/admin/ToastContext";
 
 export default function AdminSizesPage() {
+  const toast = useToast();
   const [sizes, setSizes] = useState<CarSizeType[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -43,6 +45,7 @@ export default function AdminSizesPage() {
       setSizes(Array.isArray(data) ? data : []);
     } catch (err) {
       console.error("Error loading sizes:", err);
+      toast.error("Failed to load sizes", "Could not fetch car sizes.");
     } finally {
       setLoading(false);
     }
@@ -82,14 +85,18 @@ export default function AdminSizesPage() {
     // 1. Validate MIME Type: JPG, PNG, WebP only
     const validTypes = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
     if (!validTypes.includes(file.type.toLowerCase())) {
-      setUploadError("Invalid format. Only JPG, PNG, and WebP images are allowed.");
+      const err = "Invalid format. Only JPG, PNG, and WebP images are allowed.";
+      setUploadError(err);
+      toast.error("Invalid Image Format", err);
       return;
     }
 
     // 2. Validate Size: max 2 MB
     const MAX_SIZE = 2 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      setUploadError("Image file exceeds the 2 MB maximum size limit.");
+      const err = "Image file exceeds the 2 MB maximum size limit.";
+      setUploadError(err);
+      toast.error("File Too Large", err);
       return;
     }
 
@@ -97,11 +104,15 @@ export default function AdminSizesPage() {
     // Create preview
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
+    toast.info("Image Ready to Upload", `${file.name} selected.`);
   };
 
   const handleSaveSize = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      toast.warning("Validation Error", "Please provide a category name.");
+      return;
+    }
 
     setSubmitting(true);
     setUploadError(null);
@@ -146,6 +157,7 @@ export default function AdminSizesPage() {
           }),
         });
         if (!res.ok) throw new Error("Update failed");
+        toast.success("Size Updated", `"${name}" configuration saved successfully.`);
       } else {
         const res = await fetch("/api/admin/sizes", {
           method: "POST",
@@ -158,6 +170,7 @@ export default function AdminSizesPage() {
           }),
         });
         if (!res.ok) throw new Error("Creation failed");
+        toast.success("Size Added", `"${name}" has been created.`);
       }
 
       setIsModalOpen(false);
@@ -165,6 +178,7 @@ export default function AdminSizesPage() {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Save failed";
       setUploadError(msg);
+      toast.error("Failed to Save Size", msg);
     } finally {
       setSubmitting(false);
     }
@@ -182,10 +196,11 @@ export default function AdminSizesPage() {
         { method: "DELETE" }
       );
       if (!res.ok) throw new Error("Failed to remove image");
+      toast.success("Photo Removed", `Photo for ${sz.name} removed from storage.`);
       loadSizes();
     } catch (err) {
       console.error("Remove image error:", err);
-      alert("Failed to remove image.");
+      toast.error("Removal Failed", "Could not remove vehicle image.");
     }
   };
 
@@ -199,30 +214,31 @@ export default function AdminSizesPage() {
       const res = await fetch(`/api/admin/sizes?id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
       setSizes((prev) => prev.filter((s) => s.id !== id));
+      toast.success("Size Deleted", `"${sizeName}" was deleted.`);
     } catch (err) {
       console.error("Delete size error:", err);
-      alert("Failed to delete size.");
+      toast.error("Delete Failed", "Could not delete the size category.");
     }
   };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight">
             Manage Car Sizes
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
             Rename sizes, update vehicle examples, upload images (JPG/PNG/WebP max 2MB) stored in Supabase Storage.
           </p>
         </div>
 
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-black bg-gradient-to-r from-cyan-400 to-cyan-500 hover:from-cyan-300 hover:to-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.4)] transition-all active:scale-95 self-start sm:self-auto"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95 self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4 text-black stroke-[3]" />
+          <Plus className="w-4 h-4 text-white stroke-[3]" />
           <span>Add New Size</span>
         </button>
       </div>
@@ -232,11 +248,11 @@ export default function AdminSizesPage() {
         {sizes.map((sz) => (
           <div
             key={sz.id}
-            className="glass-card rounded-2xl p-5 border border-slate-800 flex flex-col justify-between"
+            className="glass-card rounded-2xl p-5 border border-zinc-800 flex flex-col justify-between"
           >
             <div>
               {/* Image Preview Container */}
-              <div className="relative w-full h-40 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 mb-4 flex items-center justify-center">
+              <div className="relative w-full h-40 rounded-xl overflow-hidden bg-black border border-zinc-800 mb-4 flex items-center justify-center">
                 {sz.imageUrl ? (
                   <Image
                     src={sz.imageUrl}
@@ -246,14 +262,14 @@ export default function AdminSizesPage() {
                     className="object-cover"
                   />
                 ) : (
-                  <div className="flex flex-col items-center justify-center text-slate-600 p-4 text-center">
-                    <ImageIcon className="w-10 h-10 text-slate-700 mb-1" />
-                    <span className="text-[11px] text-slate-500">No Image Uploaded</span>
+                  <div className="flex flex-col items-center justify-center text-zinc-600 p-4 text-center">
+                    <ImageIcon className="w-10 h-10 text-zinc-700 mb-1" />
+                    <span className="text-[11px] text-zinc-500">No Image Uploaded</span>
                   </div>
                 )}
 
                 {/* Storage badge */}
-                <span className="absolute bottom-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded bg-black/70 backdrop-blur-md text-slate-300 border border-white/10">
+                <span className="absolute bottom-2 left-2 text-[10px] font-bold px-2 py-0.5 rounded bg-black/80 backdrop-blur-md text-zinc-300 border border-white/10">
                   {sz.imagePath ? "Supabase Storage" : "Placeholder"}
                 </span>
 
@@ -271,22 +287,22 @@ export default function AdminSizesPage() {
               {/* Title & Examples */}
               <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xl font-bold text-white">{sz.name}</h3>
-                <span className="text-xs text-slate-500 font-semibold">Tier #{sz.sortOrder}</span>
+                <span className="text-xs text-zinc-500 font-bold">Tier #{sz.sortOrder}</span>
               </div>
 
-              <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800/80 mb-4">
-                <span className="text-[11px] font-bold text-slate-400 block mb-0.5 uppercase tracking-wider">
+              <div className="bg-black/80 p-3 rounded-xl border border-zinc-800 mb-4">
+                <span className="text-[11px] font-bold text-zinc-400 block mb-0.5 uppercase tracking-wider">
                   Car Size Guide Examples:
                 </span>
-                <p className="text-xs text-slate-300 leading-relaxed">{sz.examples}</p>
+                <p className="text-xs text-zinc-300 leading-relaxed">{sz.examples}</p>
               </div>
             </div>
 
             {/* Actions */}
-            <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+            <div className="pt-3 border-t border-zinc-800 flex items-center justify-between">
               <button
                 onClick={() => openEditModal(sz)}
-                className="flex items-center gap-1.5 text-xs text-cyan-400 hover:text-cyan-300 font-semibold"
+                className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 font-bold"
               >
                 <Edit2 className="w-3.5 h-3.5" />
                 <span>Edit / Replace Image</span>
@@ -294,7 +310,7 @@ export default function AdminSizesPage() {
 
               <button
                 onClick={() => handleDeleteSize(sz.id, sz.name)}
-                className="p-1.5 text-slate-500 hover:text-red-400 transition-colors"
+                className="p-1.5 text-zinc-500 hover:text-red-400 transition-colors"
                 title="Delete car size"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -306,16 +322,16 @@ export default function AdminSizesPage() {
 
       {/* ADD / EDIT SIZE MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card rounded-2xl max-w-lg w-full p-6 border border-slate-700 shadow-2xl animate-in zoom-in-95 duration-150">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="glass-card rounded-2xl max-w-lg w-full p-6 border border-zinc-700 shadow-2xl animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
               <h3 className="font-bold text-white text-base flex items-center gap-2">
-                <Car className="w-4 h-4 text-cyan-400" />
+                <Car className="w-4 h-4 text-red-500" />
                 <span>{editingSize ? `Edit Size: ${editingSize.name}` : "Add New Car Size"}</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-zinc-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -330,7 +346,7 @@ export default function AdminSizesPage() {
 
             <form onSubmit={handleSaveSize} className="py-4 space-y-4 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-zinc-300 font-semibold mb-1">
                   Size Name * (e.g. Small, Medium, Large, XL, XXL, XXXL)
                 </label>
                 <input
@@ -339,12 +355,12 @@ export default function AdminSizesPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. XXXL"
                   required
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-sm font-bold"
+                  className="w-full p-2.5 rounded-xl bg-black border border-zinc-700 text-white focus:outline-none focus:border-red-500 text-sm font-bold"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-zinc-300 font-semibold mb-1">
                   Car Size Guide Examples *
                 </label>
                 <textarea
@@ -353,18 +369,18 @@ export default function AdminSizesPage() {
                   rows={3}
                   placeholder="e.g. Extended wheel-base vans, heavy commercial buses (e.g., Coaster, Sprinter 4x4)"
                   required
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-cyan-400 text-xs leading-relaxed"
+                  className="w-full p-2.5 rounded-xl bg-black border border-zinc-700 text-white focus:outline-none focus:border-red-500 text-xs leading-relaxed"
                 />
               </div>
 
               {/* Image Upload with Preview */}
               <div>
-                <label className="block text-slate-300 font-semibold mb-1.5">
+                <label className="block text-zinc-300 font-semibold mb-1.5">
                   Size Guide Photo (JPG, PNG, WebP only, Max 2 MB)
                 </label>
 
                 {/* Live Preview */}
-                <div className="relative w-full h-36 rounded-xl overflow-hidden bg-slate-950 border border-slate-800 mb-2.5 flex items-center justify-center">
+                <div className="relative w-full h-36 rounded-xl overflow-hidden bg-black border border-zinc-800 mb-2.5 flex items-center justify-center">
                   {previewUrl ? (
                     <Image
                       src={previewUrl}
@@ -373,8 +389,8 @@ export default function AdminSizesPage() {
                       className="object-cover"
                     />
                   ) : (
-                    <div className="text-center text-slate-500 text-xs p-4">
-                      <ImageIcon className="w-8 h-8 text-slate-600 mx-auto mb-1" />
+                    <div className="text-center text-zinc-500 text-xs p-4">
+                      <ImageIcon className="w-8 h-8 text-zinc-600 mx-auto mb-1" />
                       <span>Select an image below to preview</span>
                     </div>
                   )}
@@ -392,33 +408,33 @@ export default function AdminSizesPage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700"
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold border border-zinc-700"
                   >
-                    <Upload className="w-3.5 h-3.5 text-cyan-400" />
+                    <Upload className="w-3.5 h-3.5 text-red-400" />
                     <span>{previewUrl ? "Replace Image File" : "Choose Image File"}</span>
                   </button>
 
                   {selectedFile && (
-                    <span className="text-[11px] text-emerald-400 truncate max-w-xs flex items-center gap-1">
-                      <Check className="w-3 h-3" />
+                    <span className="text-[11px] text-white truncate max-w-xs flex items-center gap-1 font-semibold">
+                      <Check className="w-3 h-3 text-red-400" />
                       {selectedFile.name} ({(selectedFile.size / 1024).toFixed(0)} KB)
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-2">
+              <div className="pt-4 border-t border-zinc-800 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="px-5 py-2 rounded-xl bg-cyan-400 hover:bg-cyan-300 text-black font-bold text-xs flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                 >
                   {submitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                   <span>{editingSize ? "Save Changes" : "Create Car Size"}</span>

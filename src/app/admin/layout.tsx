@@ -15,8 +15,8 @@ import {
   LogOut,
   Menu,
   X,
-  ShieldCheck,
 } from "lucide-react";
+import { ToastProvider } from "@/components/admin/ToastContext";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -39,7 +39,7 @@ export default function AdminLayout({
 
   // If on login page, render children without sidebar shell
   if (pathname === "/admin/login") {
-    return <>{children}</>;
+    return <ToastProvider>{children}</ToastProvider>;
   }
 
   const handleLogout = async () => {
@@ -53,21 +53,22 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col md:flex-row">
+    <ToastProvider>
+      <div className="min-h-screen bg-[#050505] text-zinc-100 flex flex-col md:flex-row">
       {/* ============================================================== */}
       {/* DESKTOP SIDEBAR                                                */}
       {/* ============================================================== */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#0d1322] border-r border-slate-800/80 p-5 shrink-0 min-h-screen">
+      <aside className="hidden md:flex flex-col w-64 bg-[#0a0a0a] border-r border-zinc-800/80 p-5 shrink-0 min-h-screen">
         {/* Brand */}
         <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 flex items-center justify-center shadow-[0_0_15px_rgba(6,182,212,0.4)]">
-            <Sparkles className="w-5 h-5 text-black stroke-[2.5]" />
+          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)]">
+            <Sparkles className="w-5 h-5 text-white stroke-[2.5]" />
           </div>
           <div>
             <span className="font-extrabold text-sm tracking-wider text-white block">
               AUTODRIFT
             </span>
-            <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block">
+            <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider block">
               ADMIN PANEL
             </span>
           </div>
@@ -88,11 +89,11 @@ export default function AdminLayout({
                 href={item.href}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
                   isActive
-                    ? "bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 shadow-[0_0_12px_rgba(6,182,212,0.15)]"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60 border border-transparent"
+                    ? "bg-red-600/15 text-red-400 border border-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.15)]"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? "text-cyan-400" : "text-slate-400"}`} />
+                <Icon className={`w-4 h-4 ${isActive ? "text-red-400" : "text-zinc-400"}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -100,17 +101,17 @@ export default function AdminLayout({
         </nav>
 
         {/* Footer Actions */}
-        <div className="pt-4 border-t border-slate-800/80 space-y-2">
+        <div className="pt-4 border-t border-zinc-800 space-y-2">
           <Link
             href="/"
             target="_blank"
-            className="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+            className="flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-medium text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
           >
             <span className="flex items-center gap-2">
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Public Calculator</span>
             </span>
-            <span className="text-[10px] text-cyan-400 font-semibold">Live &rarr;</span>
+            <span className="text-[10px] text-red-400 font-bold">Live &rarr;</span>
           </Link>
 
           <button
@@ -126,10 +127,10 @@ export default function AdminLayout({
       {/* ============================================================== */}
       {/* MOBILE TOP BAR & DRAWER                                        */}
       {/* ============================================================== */}
-      <div className="md:hidden bg-[#0d1322] border-b border-slate-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+      <div className="md:hidden bg-[#0a0a0a] border-b border-zinc-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-black stroke-[2.5]" />
+          <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center">
+            <Sparkles className="w-4 h-4 text-white stroke-[2.5]" />
           </div>
           <span className="font-extrabold text-sm text-white tracking-wider">
             AUTODRIFT ADMIN
@@ -138,7 +139,7 @@ export default function AdminLayout({
 
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          className="p-2 text-slate-400 hover:text-white"
+          className="p-2 text-zinc-400 hover:text-white"
           aria-label="Toggle navigation"
         >
           {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -146,7 +147,7 @@ export default function AdminLayout({
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0d1322] border-b border-slate-800 p-4 space-y-2 animate-in slide-in-from-top-2">
+        <div className="md:hidden bg-[#0a0a0a] border-b border-zinc-800 p-4 space-y-2 animate-in slide-in-from-top-2">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -161,20 +162,20 @@ export default function AdminLayout({
                 onClick={() => setMobileMenuOpen(false)}
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold ${
                   isActive
-                    ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/40"
-                    : "text-slate-400 hover:bg-slate-800"
+                    ? "bg-red-600/20 text-red-400 border border-red-500/40"
+                    : "text-zinc-400 hover:bg-zinc-900"
                 }`}
               >
-                <Icon className="w-4 h-4 text-cyan-400" />
+                <Icon className="w-4 h-4 text-red-400" />
                 <span>{item.label}</span>
               </Link>
             );
           })}
-          <div className="pt-2 border-t border-slate-800 flex items-center justify-between">
+          <div className="pt-2 border-t border-zinc-800 flex items-center justify-between">
             <Link
               href="/"
               target="_blank"
-              className="text-xs text-slate-400 hover:text-white flex items-center gap-1.5"
+              className="text-xs text-zinc-400 hover:text-white flex items-center gap-1.5"
             >
               <ExternalLink className="w-3.5 h-3.5" />
               <span>Public Calculator</span>
@@ -197,5 +198,6 @@ export default function AdminLayout({
         {children}
       </div>
     </div>
+    </ToastProvider>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Sparkles,
   Plus,
@@ -14,12 +14,13 @@ import {
   Check,
   X,
   Search,
-  CheckCircle2,
 } from "lucide-react";
 import { ComboType, ServiceType, CarSizeType } from "@/types";
 import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/components/admin/ToastContext";
 
 export default function AdminCombosPage() {
+  const toast = useToast();
   const [combos, setCombos] = useState<ComboType[]>([]);
   const [allServices, setAllServices] = useState<ServiceType[]>([]);
   const [sizes, setSizes] = useState<CarSizeType[]>([]);
@@ -54,6 +55,7 @@ export default function AdminCombosPage() {
       setSizes(Array.isArray(szData) ? szData : []);
     } catch (err) {
       console.error("Error loading combo data:", err);
+      toast.error("Failed to load packages", "Could not fetch combo packages from the server.");
     } finally {
       setLoading(false);
     }
@@ -118,7 +120,10 @@ export default function AdminCombosPage() {
 
   const handleSaveCombo = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      toast.warning("Validation Error", "Please provide a combo package name.");
+      return;
+    }
 
     try {
       if (editingCombo) {
@@ -148,6 +153,8 @@ export default function AdminCombosPage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ updates: priceUpdates }),
         });
+
+        toast.success("Combo Package Updated", `"${name}" has been saved successfully.`);
       } else {
         // Create new
         const res = await fetch("/api/admin/combos", {
@@ -162,32 +169,41 @@ export default function AdminCombosPage() {
           }),
         });
         if (!res.ok) throw new Error("Creation failed");
+
+        toast.success("Combo Package Created", `"${name}" has been added to the catalog.`);
       }
 
       setIsModalOpen(false);
       loadData();
     } catch (err) {
       console.error("Error saving combo:", err);
-      alert("Failed to save combo.");
+      toast.error("Failed to Save Combo", "An error occurred while saving the package.");
     }
   };
 
   const handleToggleActive = async (combo: ComboType) => {
+    const nextActive = !combo.active;
     try {
       await fetch("/api/admin/combos", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           id: combo.id,
-          active: !combo.active,
+          active: nextActive,
         }),
       });
 
       setCombos((prev) =>
-        prev.map((c) => (c.id === combo.id ? { ...c, active: !c.active } : c))
+        prev.map((c) => (c.id === combo.id ? { ...c, active: nextActive } : c))
+      );
+
+      toast.info(
+        nextActive ? "Package Published" : "Package Hidden",
+        `"${combo.name}" is now ${nextActive ? "visible" : "hidden"} on the public calculator.`
       );
     } catch (err) {
       console.error("Toggle error:", err);
+      toast.error("Status Update Failed", "Could not toggle combo active status.");
     }
   };
 
@@ -198,9 +214,10 @@ export default function AdminCombosPage() {
       const res = await fetch(`/api/admin/combos?id=${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
       setCombos((prev) => prev.filter((c) => c.id !== id));
+      toast.success("Combo Deleted", `"${comboName}" has been removed.`);
     } catch (err) {
       console.error("Delete error:", err);
-      alert("Failed to delete combo.");
+      toast.error("Delete Failed", "Could not delete the combo package.");
     }
   };
 
@@ -227,8 +244,10 @@ export default function AdminCombosPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ reorder: reorderPayload }),
       });
+      toast.info("Package Order Updated", `Moved "${temp.name}" ${direction.toLowerCase()}.`);
     } catch (err) {
       console.error("Reorder failed:", err);
+      toast.error("Reorder Failed", "Could not update package ordering.");
       loadData();
     }
   };
@@ -240,21 +259,21 @@ export default function AdminCombosPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
         <div>
           <h1 className="text-2xl font-black text-white tracking-tight">
             Combo Package Builder
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-zinc-400 mt-1">
             Build bundled packages with live auto-computed savings per car size.
           </p>
         </div>
 
         <button
           onClick={openAddModal}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-black bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.4)] transition-all active:scale-95 self-start sm:self-auto"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs sm:text-sm text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-[0_0_15px_rgba(239,68,68,0.4)] transition-all active:scale-95 self-start sm:self-auto"
         >
-          <Plus className="w-4 h-4 text-black stroke-[3]" />
+          <Plus className="w-4 h-4 text-white stroke-[3]" />
           <span>Create New Combo</span>
         </button>
       </div>
@@ -262,22 +281,22 @@ export default function AdminCombosPage() {
       {/* Search */}
       <div className="flex items-center justify-between gap-3">
         <div className="relative w-full sm:w-72">
-          <Search className="w-3.5 h-3.5 text-slate-500 absolute left-3 top-3 pointer-events-none" />
+          <Search className="w-3.5 h-3.5 text-zinc-500 absolute left-3 top-3 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search combos..."
-            className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-800 focus:border-cyan-400 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none"
+            className="w-full pl-9 pr-3 py-2 bg-black border border-zinc-800 focus:border-red-500 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none"
           />
         </div>
       </div>
 
       {/* Combos Table */}
-      <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden shadow-2xl">
+      <div className="glass-card rounded-2xl border border-zinc-800 overflow-hidden shadow-2xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead className="bg-[#0b101d] text-slate-400 uppercase tracking-wider text-[10px] border-b border-slate-800">
+            <thead className="bg-[#0e0e0e] text-zinc-400 uppercase tracking-wider text-[10px] border-b border-zinc-800">
               <tr>
                 <th className="py-3 px-3 text-center w-14">Order</th>
                 <th className="py-3 px-4">Combo Details</th>
@@ -286,27 +305,27 @@ export default function AdminCombosPage() {
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 bg-slate-950/40">
+            <tbody className="divide-y divide-zinc-800/60 bg-black/40">
               {filteredCombos.map((combo, idx) => (
-                <tr key={combo.id} className="hover:bg-slate-900/50 transition-colors">
+                <tr key={combo.id} className="hover:bg-zinc-900/50 transition-colors">
                   {/* Order */}
                   <td className="py-3 px-2 text-center">
                     <div className="flex flex-col items-center gap-1">
-                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300">
                         #{idx + 1}
                       </span>
                       <div className="flex items-center gap-0.5">
                         <button
                           onClick={() => handleMoveOrder(idx, "UP")}
                           disabled={idx === 0}
-                          className="p-1 text-slate-500 hover:text-cyan-400 disabled:opacity-20"
+                          className="p-1 text-zinc-500 hover:text-red-400 disabled:opacity-20"
                         >
                           <ArrowUp className="w-3 h-3" />
                         </button>
                         <button
                           onClick={() => handleMoveOrder(idx, "DOWN")}
                           disabled={idx === combos.length - 1}
-                          className="p-1 text-slate-500 hover:text-cyan-400 disabled:opacity-20"
+                          className="p-1 text-zinc-500 hover:text-red-400 disabled:opacity-20"
                         >
                           <ArrowDown className="w-3 h-3" />
                         </button>
@@ -317,7 +336,7 @@ export default function AdminCombosPage() {
                   {/* Details */}
                   <td className="py-3 px-4">
                     <div className="font-bold text-white text-sm mb-1">{combo.name}</div>
-                    <p className="text-slate-400 text-xs line-clamp-2 max-w-md">
+                    <p className="text-zinc-400 text-xs line-clamp-2 max-w-md">
                       {combo.description}
                     </p>
                   </td>
@@ -328,7 +347,7 @@ export default function AdminCombosPage() {
                       {combo.services?.map((s) => (
                         <span
                           key={s.id}
-                          className="text-[10px] font-medium bg-slate-900 text-slate-300 px-2 py-0.5 rounded border border-slate-800 truncate"
+                          className="text-[10px] font-medium bg-zinc-900 text-zinc-300 px-2 py-0.5 rounded border border-zinc-800 truncate"
                         >
                           {s.name}
                         </span>
@@ -342,8 +361,8 @@ export default function AdminCombosPage() {
                       onClick={() => handleToggleActive(combo)}
                       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold transition-all ${
                         combo.active
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                          : "bg-slate-800 text-slate-500 border border-slate-700"
+                          ? "bg-red-600/20 text-red-400 border border-red-500/40"
+                          : "bg-zinc-800 text-zinc-500 border border-zinc-700"
                       }`}
                     >
                       {combo.active ? (
@@ -365,14 +384,14 @@ export default function AdminCombosPage() {
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEditModal(combo)}
-                        className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
+                        className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
                         title="Edit Combo"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDeleteCombo(combo.id, combo.name)}
-                        className="p-1.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        className="p-1.5 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                         title="Delete Combo"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -388,16 +407,16 @@ export default function AdminCombosPage() {
 
       {/* COMBO BUILDER MODAL */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-card rounded-2xl max-w-2xl w-full p-6 border border-slate-700 shadow-2xl animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="glass-card rounded-2xl max-w-2xl w-full p-6 border border-zinc-700 shadow-2xl animate-in zoom-in-95 duration-150 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
               <h3 className="font-bold text-white text-base flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-amber-400" />
+                <Sparkles className="w-4 h-4 text-red-500" />
                 <span>{editingCombo ? "Edit Combo Package" : "Create New Combo Package"}</span>
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="text-slate-400 hover:text-white"
+                className="text-zinc-400 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -405,7 +424,7 @@ export default function AdminCombosPage() {
 
             <form onSubmit={handleSaveCombo} className="py-4 space-y-5 text-xs">
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-zinc-300 font-semibold mb-1">
                   Package Name *
                 </label>
                 <input
@@ -414,12 +433,12 @@ export default function AdminCombosPage() {
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Signature Paint Correction & Ceramic Armor"
                   required
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-400 text-sm"
+                  className="w-full p-2.5 rounded-xl bg-black border border-zinc-700 text-white focus:outline-none focus:border-red-500 text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">
+                <label className="block text-zinc-300 font-semibold mb-1">
                   Description / Package Summary *
                 </label>
                 <textarea
@@ -427,21 +446,21 @@ export default function AdminCombosPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
                   placeholder="Why should customers choose this package?..."
-                  className="w-full p-2.5 rounded-xl bg-slate-950 border border-slate-700 text-white focus:outline-none focus:border-amber-400 text-xs"
+                  className="w-full p-2.5 rounded-xl bg-black border border-zinc-700 text-white focus:outline-none focus:border-red-500 text-xs"
                 />
               </div>
 
               {/* Multi-select Included Services */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-slate-300 font-semibold">
+                  <label className="text-zinc-300 font-semibold">
                     Select Included Services ({selectedServiceIds.length} selected) *
                   </label>
-                  <span className="text-[11px] text-slate-500">
+                  <span className="text-[11px] text-zinc-500">
                     Check the services included in this package
                   </span>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-slate-950 rounded-xl border border-slate-800">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto p-2 bg-black rounded-xl border border-zinc-800">
                   {allServices.map((svc) => {
                     const isChecked = selectedServiceIds.includes(svc.id);
                     return (
@@ -450,13 +469,13 @@ export default function AdminCombosPage() {
                         onClick={() => toggleService(svc.id)}
                         className={`p-2 rounded-lg cursor-pointer flex items-center gap-2 border transition-colors ${
                           isChecked
-                            ? "bg-amber-950/40 border-amber-500/40 text-amber-200"
-                            : "bg-slate-900/60 border-slate-800 text-slate-400 hover:text-white"
+                            ? "bg-red-950/40 border-red-500/50 text-red-200"
+                            : "bg-zinc-900/60 border-zinc-800 text-zinc-400 hover:text-white"
                         }`}
                       >
                         <div
                           className={`w-4 h-4 rounded flex items-center justify-center shrink-0 ${
-                            isChecked ? "bg-amber-400 text-black" : "border border-slate-600"
+                            isChecked ? "bg-red-600 text-white" : "border border-zinc-600"
                           }`}
                         >
                           {isChecked && <Check className="w-3 h-3 stroke-[3]" />}
@@ -471,11 +490,11 @@ export default function AdminCombosPage() {
               {/* LIVE SAVINGS & PRICING TABLE PER SIZE */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-slate-300 font-semibold">
+                  <label className="text-zinc-300 font-semibold">
                     Pricing &amp; Live Computed Savings per Size
                   </label>
-                  <span className="text-[10px] text-emerald-400 font-bold flex items-center gap-1">
-                    <Flame className="w-3 h-3 fill-emerald-400" />
+                  <span className="text-[10px] text-red-400 font-bold flex items-center gap-1">
+                    <Flame className="w-3 h-3 fill-red-400" />
                     <span>Auto-computed live</span>
                   </span>
                 </div>
@@ -489,24 +508,24 @@ export default function AdminCombosPage() {
                     return (
                       <div
                         key={sz.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-slate-950/80 border border-slate-800"
+                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3 rounded-xl bg-black/80 border border-zinc-800"
                       >
                         <div className="flex items-center gap-2 min-w-[120px]">
-                          <span className="text-xs font-bold text-cyan-400">{sz.name}</span>
+                          <span className="text-xs font-bold text-red-400">{sz.name}</span>
                         </div>
 
                         <div className="flex items-center gap-4 flex-1 justify-end">
                           <div className="text-right">
-                            <span className="text-[10px] text-slate-500 block">
+                            <span className="text-[10px] text-zinc-500 block">
                               Regular Individual Total:
                             </span>
-                            <span className="text-xs text-slate-300 font-semibold">
+                            <span className="text-xs text-zinc-300 font-semibold">
                               {formatCurrency(regularTotal)}
                             </span>
                           </div>
 
                           <div className="text-right">
-                            <span className="text-[10px] text-slate-400 block font-medium">
+                            <span className="text-[10px] text-zinc-400 block font-medium">
                               Combo Price (₱):
                             </span>
                             <input
@@ -516,20 +535,20 @@ export default function AdminCombosPage() {
                                 setComboPrices({
                                   ...comboPrices,
                                   [sz.id]: parseFloat(e.target.value) || 0,
-                                })
+                                 })
                               }
-                              className="w-24 bg-slate-900 border border-slate-700 p-1.5 rounded-lg text-right text-xs font-bold text-white focus:outline-none focus:border-amber-400"
+                              className="w-24 bg-zinc-900 border border-zinc-700 p-1.5 rounded-lg text-right text-xs font-bold text-white focus:outline-none focus:border-red-500"
                             />
                           </div>
 
                           <div className="min-w-[110px] text-right">
-                            <span className="text-[10px] text-slate-500 block">Customer Savings:</span>
+                            <span className="text-[10px] text-zinc-500 block">Customer Savings:</span>
                             {savings > 0 ? (
-                              <span className="inline-flex items-center gap-1 text-[11px] font-black text-amber-300 bg-amber-950/60 px-2 py-0.5 rounded-full border border-amber-500/40">
+                              <span className="inline-flex items-center gap-1 text-[11px] font-black text-white bg-red-600 px-2.5 py-0.5 rounded-full border border-red-400/40">
                                 Save {formatCurrency(savings)}
                               </span>
                             ) : (
-                              <span className="text-xs text-slate-500">₱0 savings</span>
+                              <span className="text-xs text-zinc-500">₱0 savings</span>
                             )}
                           </div>
                         </div>
@@ -545,27 +564,27 @@ export default function AdminCombosPage() {
                   id="active-combo-toggle"
                   checked={active}
                   onChange={(e) => setActive(e.target.checked)}
-                  className="w-4 h-4 rounded text-amber-500 focus:ring-0 bg-slate-900 border-slate-700"
+                  className="w-4 h-4 rounded text-red-600 focus:ring-0 bg-black border-zinc-700"
                 />
                 <label
                   htmlFor="active-combo-toggle"
-                  className="text-xs text-slate-300 font-semibold cursor-pointer"
+                  className="text-xs text-zinc-300 font-semibold cursor-pointer"
                 >
                   Active (Display on public combo selection)
                 </label>
               </div>
 
-              <div className="pt-4 border-t border-slate-800 flex items-center justify-end gap-2">
+              <div className="pt-4 border-t border-zinc-800 flex items-center justify-end gap-2">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 hover:bg-slate-700 text-xs font-semibold"
+                  className="px-4 py-2 rounded-xl bg-zinc-800 text-zinc-300 hover:bg-zinc-700 text-xs font-semibold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs"
+                  className="px-5 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold text-xs shadow-[0_0_12px_rgba(239,68,68,0.4)]"
                 >
                   {editingCombo ? "Save Combo" : "Create Combo"}
                 </button>

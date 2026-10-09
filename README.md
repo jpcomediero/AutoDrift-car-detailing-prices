@@ -11,7 +11,7 @@ A production-grade, high-performance web application for a modern automotive det
 - **Database & ORM**: PostgreSQL via [Supabase](https://supabase.com/) with [Prisma ORM](https://www.prisma.io/)
 - **Authentication**: Supabase Auth (Email & Password)
 - **Object Storage**: Supabase Storage (`car-size-images` public bucket)
-- **AI Vehicle Sizing**: Anthropic Claude API (`claude-3-haiku` with intelligent local fallback)
+- **AI Vehicle Sizing**: Google Gemini API (`gemini-1.5-flash` with intelligent local fallback)
 - **Deployment Target**: [Vercel](https://vercel.com/)
 
 ---
@@ -20,15 +20,16 @@ A production-grade, high-performance web application for a modern automotive det
 
 ### 1. Public Landing Page (No Login Required)
 - **Step 1 - Car Size Selection**: Dynamic cards for `Small`, `Medium`, `Large`, `XL`, `XXL` with admin-uploaded images, lazy loading, and vehicle size guide examples (e.g. sedan, SUV, MPV).
-- **Step 2 - Claude AI Model Recommendation**: Customers input their car (e.g., *"Toyota Fortuner 2022"*). Server API calls Claude AI to recommend the matching size. Confirms matches, prompts if the size differs, or falls back gracefully without blocking the customer. Includes in-memory sliding-window rate limiting.
+- **Step 2 - Gemini AI Vehicle Sizing**: Customers input their car (e.g., *"Toyota Fortuner 2022"*). Server API calls Google Gemini API (`gemini-1.5-flash`) to recommend the matching size. Confirms matches, prompts if the size differs, or falls back gracefully without blocking the customer. Includes in-memory sliding-window rate limiting.
 - **Step 3 - Service Type**: Choose between **Normal (Individual Services)** and **Combo (Bundled Packages)**.
-- **Step 4A - Normal Services**: Top 5 admin-curated services displayed by default; real-time search across all services. Multi-select checkboxes, estimated duration badges, and expandable *"What's included"* accordions.
-- **Step 4B - Combos**: Top 5 combos by default with full search; single-select. Displays included services and a live **"Save ₱XXX"** badge calculated against individual service prices.
-- **Quote Summary Panel**:
-  - Sticky bottom sheet on mobile devices.
-  - Sticky side panel on desktop screens.
-  - Live running total, per-item prices, crossed-out original prices for promo sales, and disclaimer: *"Prices may vary depending on the vehicle's condition."*
-- **Navigation**: Progress stepper, "Back" button on each step, and "Start Over" reset.
+- **Step 4 - Services & Packages Selection**:
+  - **4A (Normal Services)**: Top 5 admin-curated services displayed by default; real-time search across all services. Multi-select checkboxes, estimated duration badges, and expandable *"What's included"* accordions.
+  - **4B (Combos)**: Top 5 combos by default with full search; single-select. Displays included services and a live **"Save ₱XXX"** badge calculated against individual service prices.
+- **Step 5 - Official Final Quote Summary**:
+  - Full-page dedicated quote breakdown.
+  - Vehicle details, itemized service durations, promo savings breakdown, and grand total estimate.
+  - One-click **"Copy Full Quote Breakdown"** and **"Print / Save PDF"** actions.
+- **Navigation**: 5-step progress stepper, "Back" button on each step, "Modify Selections", and "Start Over" reset.
 
 ### 2. Protected Admin Section (`/admin`)
 - **Protected by Middleware & Server Guards**: Supabase Auth verification. Public users cannot access admin pages or admin APIs.
@@ -109,7 +110,7 @@ NEXT_PUBLIC_SUPABASE_URL="https://[project-ref].supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY="eyJhbGciOi..."
 SUPABASE_SERVICE_ROLE_KEY="eyJhbGciOi..."
 
-ANTHROPIC_API_KEY="sk-ant-api03-..."
+GEMINI_API_KEY="AIzaSy..."
 ```
 
 > **Note for Local Testing without Supabase:** If credentials are not configured yet, the app runs in **Demo Mode** with graceful fallbacks. You can log into `/admin/login` using:

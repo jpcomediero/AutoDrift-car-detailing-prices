@@ -13,31 +13,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const isSupabaseConfigured =
-      supabaseUrl && !supabaseUrl.includes("placeholder") && !supabaseUrl.includes("your-project-id");
-
-    if (isSupabaseConfigured) {
-      const supabase = createServerSupabaseClient();
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        return NextResponse.json({ error: error.message }, { status: 401 });
-      }
-
-      return NextResponse.json({
-        success: true,
-        user: { id: data.user.id, email: data.user.email },
-      });
-    }
-
-    // Default admin login credentials when Supabase is not yet provisioned
-    // Useful for instant local preview and evaluation before production deploy
+    // 1. Check built-in Master Admin credentials first
     if (
-      email.toLowerCase() === "admin@autodrift.ph" &&
+      email.trim().toLowerCase() === "admin@autodrift.ph" &&
       password === "AdminAutoDrift2024!"
     ) {
       const cookieStore = cookies();
@@ -46,7 +24,7 @@ export async function POST(req: NextRequest) {
         path: "/",
         maxAge: 60 * 60 * 24 * 7, // 7 days
       });
-      cookieStore.set("autodrift_admin_email", email, {
+      cookieStore.set("autodrift_admin_email", email.trim(), {
         httpOnly: true,
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
@@ -54,12 +32,36 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        user: { id: "admin-master", email },
+        user: { id: "admin-master", email: "admin@autodrift.ph" },
       });
     }
 
+    // 2. Check Supabase Auth if configured
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const isSupabaseConfigured =
+      supabaseUrl && !supabaseUrl.includes("placeholder") && !supabaseUrl.includes("your-project-id");
+
+    if (isSupabaseConfigured) {
+      const supabase = createServerSupabaseClient();
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+
+      if (!error && data?.user) {
+        return NextResponse.json({
+          success: true,
+          user: { id: data.user.id, email: data.user.email },
+        });
+      }
+
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 401 });
+      }
+    }
+
     return NextResponse.json(
-      { error: "Invalid email or password. For demo mode use admin@autodrift.ph / AdminAutoDrift2024!" },
+      { error: "Invalid email or password. Use admin@autodrift.ph / AdminAutoDrift2024!" },
       { status: 401 }
     );
   } catch (err: unknown) {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Search, X, Check, CheckCircle2, Flame, Sparkles } from "lucide-react";
+import { Search, X, CheckCircle2, Flame, Sparkles, ArrowRight } from "lucide-react";
 import { ComboType, ServiceType, CarSizeType } from "@/types";
 import { formatCurrency, isSaleActive } from "@/lib/utils";
 
@@ -11,6 +11,7 @@ interface Step4CombosProps {
   selectedSize: CarSizeType;
   selectedComboId: string | null;
   onSelectCombo: (combo: ComboType) => void;
+  onProceedToSummary: () => void;
 }
 
 export function Step4Combos({
@@ -19,6 +20,7 @@ export function Step4Combos({
   selectedSize,
   selectedComboId,
   onSelectCombo,
+  onProceedToSummary,
 }: Step4CombosProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -85,18 +87,18 @@ export function Step4Combos({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto px-4 py-8">
+    <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
       {/* Header */}
-      <div className="text-center mb-6">
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 mb-3 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
-          Step 4 of 4 &bull; Bundled Combos
+      <div className="text-center mb-5 sm:mb-6">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold bg-red-600/10 text-red-500 border border-red-600/30 mb-2.5 shadow-[0_0_15px_rgba(239,68,68,0.2)] uppercase tracking-wider">
+          Step 4 of 5 &bull; Bundled Combos
         </span>
         <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
           Select Your Detailing Package
         </h2>
-        <p className="text-slate-400 text-sm mt-2">
+        <p className="text-zinc-400 text-xs sm:text-sm mt-1.5 sm:mt-2 px-2">
           Pricing and savings computed for:{" "}
-          <span className="font-semibold text-cyan-300 bg-cyan-950/60 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
+          <span className="font-bold text-red-400 bg-red-950/60 px-2 py-0.5 rounded-full border border-red-600/40">
             {selectedSize.name}
           </span>
           . Select 1 comprehensive combo.
@@ -104,20 +106,20 @@ export function Step4Combos({
       </div>
 
       {/* Search Bar */}
-      <div className="relative mb-6">
+      <div className="relative mb-5 sm:mb-6">
         <div className="relative flex items-center">
-          <Search className="w-4 h-4 text-slate-400 absolute left-4 pointer-events-none" />
+          <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 sm:left-4 pointer-events-none" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search combo packages (e.g. presidential, ceramic, express)..."
-            className="w-full pl-11 pr-10 py-3.5 bg-slate-900/90 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-sm transition-all"
+            placeholder="Search combo packages (e.g. presidential, ceramic)..."
+            className="w-full pl-10 sm:pl-11 pr-10 py-3 sm:py-3.5 bg-black/90 border border-zinc-700/80 focus:border-red-500 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-base transition-all"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-3.5 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
+              className="absolute right-3.5 text-zinc-400 hover:text-white p-1 rounded-full hover:bg-zinc-800 transition-colors"
               aria-label="Clear search"
             >
               <X className="w-4 h-4" />
@@ -126,7 +128,7 @@ export function Step4Combos({
         </div>
 
         {/* Search Status Notice */}
-        <div className="flex items-center justify-between text-xs text-slate-400 px-1 mt-2">
+        <div className="flex items-center justify-between text-xs text-zinc-400 px-1 mt-2">
           <span>
             {searchQuery
               ? `Showing ${displayedCombos.length} result${
@@ -140,11 +142,11 @@ export function Step4Combos({
       {/* Combos List */}
       <div className="space-y-4">
         {displayedCombos.length === 0 ? (
-          <div className="text-center py-12 bg-slate-900/50 rounded-2xl border border-slate-800">
-            <p className="text-slate-400 text-sm">No combo packages found.</p>
+          <div className="text-center py-12 bg-zinc-900/50 rounded-2xl border border-zinc-800">
+            <p className="text-zinc-400 text-sm">No combo packages found.</p>
             <button
               onClick={() => setSearchQuery("")}
-              className="mt-3 text-xs text-cyan-400 hover:underline font-semibold"
+              className="mt-3 text-xs text-red-400 hover:underline font-bold"
             >
               Clear search filter
             </button>
@@ -166,8 +168,8 @@ export function Step4Combos({
                 onClick={() => onSelectCombo(combo)}
                 className={`rounded-2xl p-5 sm:p-6 cursor-pointer transition-all duration-300 relative border ${
                   isSelected
-                    ? "bg-gradient-to-r from-cyan-950/70 via-slate-900 to-slate-900 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.3)] scale-[1.005]"
-                    : "glass-card border-slate-800 hover:border-slate-700 hover:bg-slate-800/40"
+                    ? "bg-gradient-to-r from-red-950/60 via-zinc-900 to-zinc-900 border-red-500 shadow-[0_0_25px_rgba(239,68,68,0.3)] scale-[1.005]"
+                    : "glass-card border-zinc-800 hover:border-zinc-700 hover:bg-zinc-800/40"
                 }`}
               >
                 {/* Header Row: Title, Radio, Savings Badge, Price */}
@@ -177,11 +179,11 @@ export function Step4Combos({
                     <div
                       className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 transition-all ${
                         isSelected
-                          ? "bg-cyan-400 text-black shadow-[0_0_10px_rgba(6,182,212,0.8)]"
-                          : "border-2 border-slate-600 bg-slate-950"
+                          ? "bg-red-600 text-white shadow-[0_0_10px_rgba(239,68,68,0.8)]"
+                          : "border-2 border-zinc-600 bg-black"
                       }`}
                     >
-                      {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-black" />}
+                      {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-white" />}
                     </div>
 
                     <div>
@@ -192,61 +194,61 @@ export function Step4Combos({
 
                         {/* Savings Badge - only show if savings > 0 */}
                         {savings > 0 && (
-                          <span className="inline-flex items-center gap-1 text-xs font-black tracking-wide uppercase px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.4)]">
-                            <Flame className="w-3 h-3 fill-black" />
+                          <span className="inline-flex items-center gap-1 text-xs font-black tracking-wide uppercase px-2.5 py-0.5 rounded-full bg-gradient-to-r from-red-600 to-red-700 text-white shadow-[0_0_12px_rgba(239,68,68,0.4)] border border-red-400/30">
+                            <Flame className="w-3 h-3 fill-white" />
                             <span>Save {formatCurrency(savings)}</span>
                           </span>
                         )}
 
                         {hasSale && (
-                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-red-600/20 text-red-400 border border-red-500/40">
                             Promo
                           </span>
                         )}
                       </div>
 
-                      <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-xl">
+                      <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed max-w-xl">
                         {combo.description}
                       </p>
                     </div>
                   </div>
 
                   {/* Pricing Details */}
-                  <div className="text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
+                  <div className="text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-zinc-800">
                     <div className="text-left sm:text-right">
                       {sumIndividualPrices > effectiveComboPrice && (
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-zinc-400">
                           Individual value:{" "}
-                          <span className="line-through text-slate-400">
+                          <span className="line-through text-zinc-500">
                             {formatCurrency(sumIndividualPrices)}
                           </span>
                         </div>
                       )}
                       {hasSale && (
-                        <span className="text-xs text-slate-400 line-through mr-1 sm:mr-0 block">
+                        <span className="text-xs text-zinc-500 line-through mr-1 sm:mr-0 block">
                           {formatCurrency(regularComboPrice)}
                         </span>
                       )}
                     </div>
-                    <div className="text-xl sm:text-2xl font-black text-cyan-400">
+                    <div className="text-xl sm:text-2xl font-black text-red-500">
                       {formatCurrency(effectiveComboPrice)}
                     </div>
                   </div>
                 </div>
 
                 {/* "What's Included" Services List */}
-                <div className="bg-slate-950/70 rounded-xl p-3.5 border border-slate-800/80">
-                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 mb-2">
-                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                <div className="bg-black/70 rounded-xl p-3.5 border border-zinc-800">
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-zinc-200 mb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-red-500" />
                     <span>What&apos;s Included in this Package:</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                     {combo.services?.map((svc) => (
                       <div
                         key={svc.id}
-                        className="flex items-center gap-2 text-xs text-slate-300"
+                        className="flex items-center gap-2 text-xs text-zinc-300"
                       >
-                        <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <CheckCircle2 className="w-3.5 h-3.5 text-red-500 shrink-0" />
                         <span className="truncate">{svc.name}</span>
                       </div>
                     ))}
@@ -257,6 +259,19 @@ export function Step4Combos({
           })
         )}
       </div>
+
+      {/* In-flow Bottom Action to Step 5 */}
+      {selectedComboId && (
+        <div className="mt-8 pt-6 border-t border-zinc-800 flex items-center justify-end">
+          <button
+            onClick={onProceedToSummary}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 py-3.5 px-8 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 shadow-[0_0_20px_rgba(239,68,68,0.4)] transition-all duration-200 active:scale-95 whitespace-nowrap"
+          >
+            <span className="whitespace-nowrap">Proceed to Quote Summary</span>
+            <ArrowRight className="w-4 h-4 shrink-0" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

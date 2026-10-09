@@ -4,43 +4,51 @@
 
 :root {
   --foreground-rgb: 255, 255, 255;
-  --background-start-rgb: 9, 13, 22;
-  --background-end-rgb: 15, 23, 42;
+  --background-start-rgb: 5, 5, 5;
+  --background-end-rgb: 15, 15, 15;
+}
+
+html {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: #090d16;
+  background: #050505;
   min-height: 100vh;
+  overflow-x: hidden;
   font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 
-/* Custom glossy car detailing accents */
+/* Custom glossy car detailing accents in Red, White, and Black */
 .glass-panel {
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(12, 12, 12, 0.85);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-card {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7) 0%, rgba(15, 23, 42, 0.8) 100%);
+  background: linear-gradient(135deg, rgba(24, 24, 27, 0.75) 0%, rgba(10, 10, 10, 0.9) 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .glass-card:hover {
-  border-color: rgba(6, 182, 212, 0.4);
-  box-shadow: 0 12px 35px rgba(6, 182, 212, 0.15);
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 12px 35px rgba(220, 38, 38, 0.2);
 }
 
 .glass-card-selected {
-  background: linear-gradient(135deg, rgba(8, 51, 68, 0.85) 0%, rgba(15, 23, 42, 0.95) 100%);
-  border: 1.5px solid #06b6d4;
-  box-shadow: 0 0 25px rgba(6, 182, 212, 0.35);
+  background: linear-gradient(135deg, rgba(69, 10, 10, 0.5) 0%, rgba(15, 15, 15, 0.95) 100%);
+  border: 1.5px solid #ef4444;
+  box-shadow: 0 0 25px rgba(239, 68, 68, 0.35);
 }
 
 /* Sleek custom scrollbars */
@@ -50,16 +58,16 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #090d16;
+  background: #050505;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #27272a;
   border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #06b6d4;
+  background: #ef4444;
 }
 
 /* Gloss highlight effect */
