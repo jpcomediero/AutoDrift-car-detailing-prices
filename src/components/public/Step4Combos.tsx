@@ -1,0 +1,262 @@
+"use client";
+
+import React, { useState, useMemo } from "react";
+import { Search, X, Check, CheckCircle2, Flame, Sparkles } from "lucide-react";
+import { ComboType, ServiceType, CarSizeType } from "@/types";
+import { formatCurrency, isSaleActive } from "@/lib/utils";
+
+interface Step4CombosProps {
+  combos: ComboType[];
+  allServices: ServiceType[];
+  selectedSize: CarSizeType;
+  selectedComboId: string | null;
+  onSelectCombo: (combo: ComboType) => void;
+}
+
+export function Step4Combos({
+  combos,
+  allServices,
+  selectedSize,
+  selectedComboId,
+  onSelectCombo,
+}: Step4CombosProps) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const sortedCombos = useMemo(() => {
+    return [...combos].sort((a, b) => a.sortOrder - b.sortOrder);
+  }, [combos]);
+
+  // Default first 5 items, search searches all combos
+  const displayedCombos = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) {
+      return sortedCombos.slice(0, 5);
+    }
+    return sortedCombos.filter((c) => {
+      const inName = c.name.toLowerCase().includes(q);
+      const inDesc = c.description.toLowerCase().includes(q);
+      const inServices = c.services?.some((s) =>
+        s.name.toLowerCase().includes(q)
+      );
+      return inName || inDesc || inServices;
+    });
+  }, [sortedCombos, searchQuery]);
+
+  // Compute regular total and savings for a combo
+  const getComboPricingDetails = (combo: ComboType) => {
+    // 1. Combo price for selected size
+    const comboPriceRecord = combo.prices?.find(
+      (p) => p.carSizeId === selectedSize.id
+    );
+    const regularComboPrice = comboPriceRecord?.price ?? 0;
+    const saleComboPrice = comboPriceRecord?.salePrice;
+    const hasSale =
+      saleComboPrice &&
+      isSaleActive(
+        saleComboPrice,
+        comboPriceRecord?.saleStart,
+        comboPriceRecord?.saleEnd
+      );
+    const effectiveComboPrice = hasSale ? saleComboPrice : regularComboPrice;
+
+    // 2. Sum of included services' individual prices for selected size
+    let sumIndividualPrices = 0;
+    const includedServices = combo.services || [];
+
+    includedServices.forEach((svc) => {
+      // Find latest service price for this size
+      const fullSvc = allServices.find((s) => s.id === svc.id) || svc;
+      const svcPriceRecord = fullSvc.prices?.find(
+        (p) => p.carSizeId === selectedSize.id
+      );
+      const svcPrice = svcPriceRecord?.price ?? 0;
+      sumIndividualPrices += svcPrice;
+    });
+
+    const savings = Math.max(0, sumIndividualPrices - effectiveComboPrice);
+
+    return {
+      effectiveComboPrice,
+      regularComboPrice,
+      hasSale,
+      sumIndividualPrices,
+      savings,
+    };
+  };
+
+  return (
+    <div className="w-full max-w-4xl mx-auto px-4 py-8">
+      {/* Header */}
+      <div className="text-center mb-6">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 mb-3 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+          Step 4 of 4 &bull; Bundled Combos
+        </span>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+          Select Your Detailing Package
+        </h2>
+        <p className="text-slate-400 text-sm mt-2">
+          Pricing and savings computed for:{" "}
+          <span className="font-semibold text-cyan-300 bg-cyan-950/60 px-2.5 py-0.5 rounded-full border border-cyan-500/30">
+            {selectedSize.name}
+          </span>
+          . Select 1 comprehensive combo.
+        </p>
+      </div>
+
+      {/* Search Bar */}
+      <div className="relative mb-6">
+        <div className="relative flex items-center">
+          <Search className="w-4 h-4 text-slate-400 absolute left-4 pointer-events-none" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search combo packages (e.g. presidential, ceramic, express)..."
+            className="w-full pl-11 pr-10 py-3.5 bg-slate-900/90 border border-slate-700/80 focus:border-cyan-400 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/30 text-sm transition-all"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-3.5 text-slate-400 hover:text-white p-1 rounded-full hover:bg-slate-800 transition-colors"
+              aria-label="Clear search"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+        </div>
+
+        {/* Search Status Notice */}
+        <div className="flex items-center justify-between text-xs text-slate-400 px-1 mt-2">
+          <span>
+            {searchQuery
+              ? `Showing ${displayedCombos.length} result${
+                  displayedCombos.length === 1 ? "" : "s"
+                } matching "${searchQuery}"`
+              : `Showing top 5 recommended combos. Search to browse all ${sortedCombos.length} combos.`}
+          </span>
+        </div>
+      </div>
+
+      {/* Combos List */}
+      <div className="space-y-4">
+        {displayedCombos.length === 0 ? (
+          <div className="text-center py-12 bg-slate-900/50 rounded-2xl border border-slate-800">
+            <p className="text-slate-400 text-sm">No combo packages found.</p>
+            <button
+              onClick={() => setSearchQuery("")}
+              className="mt-3 text-xs text-cyan-400 hover:underline font-semibold"
+            >
+              Clear search filter
+            </button>
+          </div>
+        ) : (
+          displayedCombos.map((combo) => {
+            const isSelected = selectedComboId === combo.id;
+            const {
+              effectiveComboPrice,
+              regularComboPrice,
+              hasSale,
+              sumIndividualPrices,
+              savings,
+            } = getComboPricingDetails(combo);
+
+            return (
+              <div
+                key={combo.id}
+                onClick={() => onSelectCombo(combo)}
+                className={`rounded-2xl p-5 sm:p-6 cursor-pointer transition-all duration-300 relative border ${
+                  isSelected
+                    ? "bg-gradient-to-r from-cyan-950/70 via-slate-900 to-slate-900 border-cyan-400 shadow-[0_0_25px_rgba(6,182,212,0.3)] scale-[1.005]"
+                    : "glass-card border-slate-800 hover:border-slate-700 hover:bg-slate-800/40"
+                }`}
+              >
+                {/* Header Row: Title, Radio, Savings Badge, Price */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                  <div className="flex items-start gap-3.5">
+                    {/* Single-select radio circle */}
+                    <div
+                      className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-1 transition-all ${
+                        isSelected
+                          ? "bg-cyan-400 text-black shadow-[0_0_10px_rgba(6,182,212,0.8)]"
+                          : "border-2 border-slate-600 bg-slate-950"
+                      }`}
+                    >
+                      {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-black" />}
+                    </div>
+
+                    <div>
+                      <div className="flex flex-wrap items-center gap-2 mb-1">
+                        <h3 className="font-extrabold text-white text-lg sm:text-xl">
+                          {combo.name}
+                        </h3>
+
+                        {/* Savings Badge - only show if savings > 0 */}
+                        {savings > 0 && (
+                          <span className="inline-flex items-center gap-1 text-xs font-black tracking-wide uppercase px-2.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-black shadow-[0_0_12px_rgba(245,158,11,0.4)]">
+                            <Flame className="w-3 h-3 fill-black" />
+                            <span>Save {formatCurrency(savings)}</span>
+                          </span>
+                        )}
+
+                        {hasSale && (
+                          <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                            Promo
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-xl">
+                        {combo.description}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Pricing Details */}
+                  <div className="text-right shrink-0 flex sm:flex-col items-center sm:items-end justify-between sm:justify-start pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-800">
+                    <div className="text-left sm:text-right">
+                      {sumIndividualPrices > effectiveComboPrice && (
+                        <div className="text-xs text-slate-400">
+                          Individual value:{" "}
+                          <span className="line-through text-slate-400">
+                            {formatCurrency(sumIndividualPrices)}
+                          </span>
+                        </div>
+                      )}
+                      {hasSale && (
+                        <span className="text-xs text-slate-400 line-through mr-1 sm:mr-0 block">
+                          {formatCurrency(regularComboPrice)}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-xl sm:text-2xl font-black text-cyan-400">
+                      {formatCurrency(effectiveComboPrice)}
+                    </div>
+                  </div>
+                </div>
+
+                {/* "What's Included" Services List */}
+                <div className="bg-slate-950/70 rounded-xl p-3.5 border border-slate-800/80">
+                  <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-300 mb-2">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                    <span>What&apos;s Included in this Package:</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                    {combo.services?.map((svc) => (
+                      <div
+                        key={svc.id}
+                        className="flex items-center gap-2 text-xs text-slate-300"
+                      >
+                        <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                        <span className="truncate">{svc.name}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}

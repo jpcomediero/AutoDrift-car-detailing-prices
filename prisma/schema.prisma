@@ -1,0 +1,143 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CarSize {
+  id              String           @id @default(cuid())
+  name            String           @unique
+  examples        String
+  imageUrl        String?
+  imagePath       String?
+  sortOrder       Int              @default(0)
+  active          Boolean          @default(true)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  servicePrices   ServicePrice[]
+  comboPrices     ComboPrice[]
+  priceHistories  PriceHistory[]
+  analyticsEvents AnalyticsEvent[]
+
+  @@index([sortOrder])
+}
+
+model Service {
+  id              String          @id @default(cuid())
+  name            String
+  description     String
+  durationMinutes Int             @default(60)
+  sortOrder       Int             @default(0)
+  active          Boolean         @default(true)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  prices          ServicePrice[]
+  comboServices   ComboService[]
+
+  @@index([sortOrder])
+  @@index([active])
+}
+
+model ServicePrice {
+  id          String    @id @default(cuid())
+  serviceId   String
+  carSizeId   String
+  price       Float
+  salePrice   Float?
+  saleStart   DateTime?
+  saleEnd     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  service     Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  carSize     CarSize   @relation(fields: [carSizeId], references: [id], onDelete: Cascade)
+
+  @@unique([serviceId, carSizeId])
+  @@index([serviceId])
+  @@index([carSizeId])
+}
+
+model Combo {
+  id          String         @id @default(cuid())
+  name        String
+  description String
+  sortOrder   Int            @default(0)
+  active      Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  services    ComboService[]
+  prices      ComboPrice[]
+
+  @@index([sortOrder])
+  @@index([active])
+}
+
+model ComboService {
+  id        String   @id @default(cuid())
+  comboId   String
+  serviceId String
+
+  combo     Combo    @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  service   Service  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@unique([comboId, serviceId])
+  @@index([comboId])
+  @@index([serviceId])
+}
+
+model ComboPrice {
+  id        String    @id @default(cuid())
+  comboId   String
+  carSizeId String
+  price     Float
+  salePrice Float?
+  saleStart DateTime?
+  saleEnd   DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  combo     Combo     @relation(fields: [comboId], references: [id], onDelete: Cascade)
+  carSize   CarSize   @relation(fields: [carSizeId], references: [id], onDelete: Cascade)
+
+  @@unique([comboId, carSizeId])
+  @@index([comboId])
+  @@index([carSizeId])
+}
+
+model PriceHistory {
+  id         String   @id @default(cuid())
+  itemType   String   // 'SERVICE' or 'COMBO'
+  itemId     String
+  carSizeId  String
+  oldPrice   Float
+  newPrice   Float
+  changedBy  String
+  changedAt  DateTime @default(now())
+
+  carSize    CarSize? @relation(fields: [carSizeId], references: [id], onDelete: Cascade)
+
+  @@index([itemType, itemId])
+  @@index([carSizeId])
+  @@index([changedAt])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  eventType String   // 'VIEW' | 'SELECT' | 'QUOTE_GENERATED' | 'SIZE_CHOSEN'
+  itemType  String?  // 'SERVICE' | 'COMBO' | 'SIZE'
+  itemId    String?
+  carSizeId String?
+  createdAt DateTime @default(now())
+
+  carSize   CarSize? @relation(fields: [carSizeId], references: [id], onDelete: SetNull)
+
+  @@index([eventType])
+  @@index([itemType])
+  @@index([createdAt])
+}
