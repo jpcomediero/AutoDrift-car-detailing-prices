@@ -17,6 +17,7 @@ import {
   X,
 } from "lucide-react";
 import { ToastProvider } from "@/components/admin/ToastContext";
+import { BrandLogo } from "@/components/common/BrandLogo";
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -60,18 +61,12 @@ export default function AdminLayout({
       {/* ============================================================== */}
       <aside className="hidden md:flex flex-col w-64 bg-[#0a0a0a] border-r border-zinc-800/80 p-5 shrink-0 min-h-screen">
         {/* Brand */}
-        <div className="flex items-center gap-3 mb-8 px-2">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.4)]">
-            <Sparkles className="w-5 h-5 text-white stroke-[2.5]" />
-          </div>
-          <div>
-            <span className="font-extrabold text-sm tracking-wider text-white block">
-              AUTODRIFT
-            </span>
-            <span className="text-[10px] font-bold text-red-500 uppercase tracking-wider block">
-              ADMIN PANEL
-            </span>
-          </div>
+        <div className="mb-8 px-2">
+          <BrandLogo
+            showIcon={false}
+            showBadge={true}
+            badgeText="ADMIN PANEL"
+          />
         </div>
 
         {/* Navigation Items */}
@@ -128,14 +123,11 @@ export default function AdminLayout({
       {/* MOBILE TOP BAR & DRAWER                                        */}
       {/* ============================================================== */}
       <div className="md:hidden bg-[#0a0a0a] border-b border-zinc-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-red-600 flex items-center justify-center">
-            <Sparkles className="w-4 h-4 text-white stroke-[2.5]" />
-          </div>
-          <span className="font-extrabold text-sm text-white tracking-wider">
-            AUTODRIFT ADMIN
-          </span>
-        </div>
+        <BrandLogo
+          showIcon={false}
+          showBadge={false}
+          logoClassName="h-7 w-auto"
+        />
 
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}

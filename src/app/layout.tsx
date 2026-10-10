@@ -17,6 +17,10 @@ export const metadata: Metadata = {
     "interior detail",
     "car detailing prices",
   ],
+  icons: {
+    icon: "/images/icon.png",
+    apple: "/images/icon.png",
+  },
 };
 
 export const viewport: Viewport = {

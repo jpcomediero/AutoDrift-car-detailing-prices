@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { BrandLogo } from "@/components/common/BrandLogo";
 import { Sparkles, Shield, RefreshCw, Lock } from "lucide-react";
 import Link from "next/link";
 import { CarSizeType, ServiceType, ComboType, PublicPricingData } from "@/types";
@@ -250,25 +251,8 @@ export function CarDetailingApp() {
       {/* ============================================================== */}
       {/* BRAND TOP BAR */}
       <header className="border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-2.5 sm:py-3.5 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-[0_0_15px_rgba(239,68,68,0.5)] shrink-0">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white stroke-[2.5]" />
-            </div>
-            <div className="min-w-0">
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-base sm:text-lg font-black tracking-wider text-white">
-                  AUTODRIFT
-                </span>
-                <span className="text-[9px] sm:text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-red-600/20 text-red-500 border border-red-600/40 shrink-0">
-                  Studio
-                </span>
-              </div>
-              <p className="text-[10px] sm:text-[11px] text-zinc-400 font-medium truncate">
-                Live Pricing Calculator
-              </p>
-            </div>
-          </div>
+        <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
+          <BrandLogo showIcon={false} />
 
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <button

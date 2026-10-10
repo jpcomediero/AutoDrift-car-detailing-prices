@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Sparkles, Lock, Mail, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { Lock, Mail, ArrowRight, Loader2, AlertCircle } from "lucide-react";
+import { BrandLogo } from "@/components/common/BrandLogo";
 import Link from "next/link";
 
 export default function AdminLoginPage() {
@@ -51,15 +52,18 @@ export default function AdminLoginPage() {
     <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Brand Header */}
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center shadow-[0_0_25px_rgba(239,68,68,0.5)]">
-            <Sparkles className="w-7 h-7 text-white stroke-[2.5]" />
-          </div>
-          <h1 className="text-2xl font-black text-white tracking-wider">
-            AUTODRIFT ADMIN
+        <div className="text-center mb-8 flex flex-col items-center">
+          <BrandLogo
+            showIcon={false}
+            showBadge={false}
+            className="justify-center mb-2"
+            logoClassName="h-12 sm:h-14 w-auto object-contain"
+          />
+          <h1 className="text-xs font-extrabold text-red-500 uppercase tracking-widest mt-1">
+            ADMIN CONTROL PANEL
           </h1>
-          <p className="text-sm text-zinc-400 mt-1">
-            Price Management &amp; Catalog Control Center
+          <p className="text-xs text-zinc-400 mt-0.5">
+            Price Management &amp; Catalog Center
           </p>
         </div>
 

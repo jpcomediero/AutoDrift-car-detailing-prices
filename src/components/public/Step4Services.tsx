@@ -20,6 +20,7 @@ export function Step4Services({
   onToggleService,
   onProceedToSummary,
 }: Step4ServicesProps) {
+  const [viewMode, setViewMode] = useState<"all" | "top5">("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedIds, setExpandedIds] = useState<Record<string, boolean>>({});
 
@@ -35,19 +36,24 @@ export function Step4Services({
   }, [services]);
 
   // Compute displayed services:
-  // When no search query: top 5 by admin order
   // When search query entered: search all services
+  // When no search query: either all services or top 5 based on viewMode
   const displayedServices = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) {
+    if (q) {
+      return sortedServices.filter(
+        (s) =>
+          s.name.toLowerCase().includes(q) ||
+          s.description.toLowerCase().includes(q)
+      );
+    }
+    if (viewMode === "top5") {
       return sortedServices.slice(0, 5);
     }
-    return sortedServices.filter(
-      (s) =>
-        s.name.toLowerCase().includes(q) ||
-        s.description.toLowerCase().includes(q)
-    );
-  }, [sortedServices, searchQuery]);
+    return sortedServices;
+  }, [sortedServices, searchQuery, viewMode]);
+
+  const hasMoreThanFive = sortedServices.length > 5;
 
   return (
     <div className="w-full max-w-4xl mx-auto px-2 sm:px-4 py-4 sm:py-8">
@@ -68,8 +74,8 @@ export function Step4Services({
         </p>
       </div>
 
-      {/* Search Bar */}
-      <div className="relative mb-5 sm:mb-6">
+      {/* Search Bar & View Filter */}
+      <div className="relative mb-4 sm:mb-5">
         <div className="relative flex items-center">
           <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 sm:left-4 pointer-events-none" />
           <input
@@ -90,25 +96,53 @@ export function Step4Services({
           )}
         </div>
 
-        {/* Search status notice */}
-        <div className="flex items-center justify-between text-xs text-zinc-400 px-1 mt-2">
-          <span>
-            {searchQuery
-              ? `Showing ${displayedServices.length} result${
-                  displayedServices.length === 1 ? "" : "s"
-                } matching "${searchQuery}"`
-              : `Showing top 5 recommended services. Search to browse all ${sortedServices.length} services.`}
-          </span>
+        {/* View Mode Chips + Counter Notice */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400 px-1 mt-2.5">
+          {!searchQuery && hasMoreThanFive ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setViewMode("all")}
+                className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
+                  viewMode === "all"
+                    ? "bg-red-600/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
+                }`}
+              >
+                All Services ({sortedServices.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("top5")}
+                className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
+                  viewMode === "top5"
+                    ? "bg-red-600/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
+                }`}
+              >
+                Top 5 Recommended
+              </button>
+            </div>
+          ) : (
+            <span>
+              {searchQuery
+                ? `Showing ${displayedServices.length} result${
+                    displayedServices.length === 1 ? "" : "s"
+                  } matching "${searchQuery}"`
+                : `Showing all ${sortedServices.length} available services`}
+            </span>
+          )}
+
           {selectedServiceIds.length > 0 && (
-            <span className="text-red-400 font-bold">
-              {selectedServiceIds.length} selected
+            <span className="text-red-400 font-bold bg-red-950/60 px-2.5 py-0.5 rounded-full border border-red-600/40">
+              {selectedServiceIds.length} service{selectedServiceIds.length === 1 ? "" : "s"} selected
             </span>
           )}
         </div>
       </div>
 
-      {/* Services List */}
-      <div className="space-y-3.5">
+      {/* Scrollable Services List Container */}
+      <div className="max-h-[520px] sm:max-h-[560px] overflow-y-auto pr-1 sm:pr-2 space-y-3.5 scroll-smooth">
         {displayedServices.length === 0 ? (
           <div className="text-center py-12 bg-zinc-900/50 rounded-2xl border border-zinc-800">
             <p className="text-zinc-400 text-sm">No services matched your search.</p>
@@ -229,6 +263,20 @@ export function Step4Services({
               </div>
             );
           })
+        )}
+
+        {/* "See More" banner when in top5 preview */}
+        {!searchQuery && hasMoreThanFive && viewMode === "top5" && (
+          <div className="pt-2 text-center">
+            <button
+              type="button"
+              onClick={() => setViewMode("all")}
+              className="w-full py-3 px-4 rounded-xl border border-dashed border-red-500/40 hover:border-red-500 bg-red-950/20 hover:bg-red-950/40 text-red-400 hover:text-red-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+            >
+              <span>See More Services ({sortedServices.length - 5} more available)</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          </div>
         )}
       </div>
 

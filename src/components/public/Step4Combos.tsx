@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Search, X, CheckCircle2, Flame, Sparkles, ArrowRight } from "lucide-react";
+import { Search, X, CheckCircle2, Flame, Sparkles, ArrowRight, ChevronDown } from "lucide-react";
 import { ComboType, ServiceType, CarSizeType } from "@/types";
 import { formatCurrency, isSaleActive } from "@/lib/utils";
 
@@ -22,27 +22,33 @@ export function Step4Combos({
   onSelectCombo,
   onProceedToSummary,
 }: Step4CombosProps) {
+  const [viewMode, setViewMode] = useState<"all" | "top5">("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   const sortedCombos = useMemo(() => {
     return [...combos].sort((a, b) => a.sortOrder - b.sortOrder);
   }, [combos]);
 
-  // Default first 5 items, search searches all combos
+  // Default all items, or top 5 if toggled
   const displayedCombos = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
-    if (!q) {
+    if (q) {
+      return sortedCombos.filter((c) => {
+        const inName = c.name.toLowerCase().includes(q);
+        const inDesc = c.description.toLowerCase().includes(q);
+        const inServices = c.services?.some((s) =>
+          s.name.toLowerCase().includes(q)
+        );
+        return inName || inDesc || inServices;
+      });
+    }
+    if (viewMode === "top5") {
       return sortedCombos.slice(0, 5);
     }
-    return sortedCombos.filter((c) => {
-      const inName = c.name.toLowerCase().includes(q);
-      const inDesc = c.description.toLowerCase().includes(q);
-      const inServices = c.services?.some((s) =>
-        s.name.toLowerCase().includes(q)
-      );
-      return inName || inDesc || inServices;
-    });
-  }, [sortedCombos, searchQuery]);
+    return sortedCombos;
+  }, [sortedCombos, searchQuery, viewMode]);
+
+  const hasMoreThanFive = sortedCombos.length > 5;
 
   // Compute regular total and savings for a combo
   const getComboPricingDetails = (combo: ComboType) => {
@@ -127,20 +133,47 @@ export function Step4Combos({
           )}
         </div>
 
-        {/* Search Status Notice */}
-        <div className="flex items-center justify-between text-xs text-zinc-400 px-1 mt-2">
-          <span>
-            {searchQuery
-              ? `Showing ${displayedCombos.length} result${
-                  displayedCombos.length === 1 ? "" : "s"
-                } matching "${searchQuery}"`
-              : `Showing top 5 recommended combos. Search to browse all ${sortedCombos.length} combos.`}
-          </span>
+        {/* View Mode Chips + Search Status Notice */}
+        <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-zinc-400 px-1 mt-2.5">
+          {!searchQuery && hasMoreThanFive ? (
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => setViewMode("all")}
+                className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
+                  viewMode === "all"
+                    ? "bg-red-600/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
+                }`}
+              >
+                All Packages ({sortedCombos.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setViewMode("top5")}
+                className={`px-3 py-1 rounded-lg font-bold text-xs transition-all ${
+                  viewMode === "top5"
+                    ? "bg-red-600/20 text-red-400 border border-red-500/40 shadow-[0_0_10px_rgba(239,68,68,0.2)]"
+                    : "bg-zinc-900 text-zinc-400 hover:text-white border border-zinc-800"
+                }`}
+              >
+                Top 5 Recommended
+              </button>
+            </div>
+          ) : (
+            <span>
+              {searchQuery
+                ? `Showing ${displayedCombos.length} result${
+                    displayedCombos.length === 1 ? "" : "s"
+                  } matching "${searchQuery}"`
+                : `Showing all ${sortedCombos.length} available packages`}
+            </span>
+          )}
         </div>
       </div>
 
-      {/* Combos List */}
-      <div className="space-y-4">
+      {/* Scrollable Combos List Container */}
+      <div className="max-h-[540px] sm:max-h-[580px] overflow-y-auto pr-1 sm:pr-2 space-y-4 scroll-smooth">
         {displayedCombos.length === 0 ? (
           <div className="text-center py-12 bg-zinc-900/50 rounded-2xl border border-zinc-800">
             <p className="text-zinc-400 text-sm">No combo packages found.</p>
@@ -257,6 +290,20 @@ export function Step4Combos({
               </div>
             );
           })
+        )}
+
+        {/* "See More" banner when in top5 preview */}
+        {!searchQuery && hasMoreThanFive && viewMode === "top5" && (
+          <div className="pt-2 text-center">
+            <button
+              type="button"
+              onClick={() => setViewMode("all")}
+              className="w-full py-3 px-4 rounded-xl border border-dashed border-red-500/40 hover:border-red-500 bg-red-950/20 hover:bg-red-950/40 text-red-400 hover:text-red-300 font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(239,68,68,0.1)]"
+            >
+              <span>See More Packages ({sortedCombos.length - 5} more available)</span>
+              <ChevronDown className="w-4 h-4" />
+            </button>
+          </div>
         )}
       </div>
 
