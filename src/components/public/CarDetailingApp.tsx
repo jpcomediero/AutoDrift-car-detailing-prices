@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { BrandLogo } from "@/components/common/BrandLogo";
+import { RedSquareLoader } from "@/components/common/RedSquareLoader";
 import { Sparkles, Shield, RefreshCw, Lock } from "lucide-react";
 import Link from "next/link";
 import { CarSizeType, ServiceType, ComboType, PublicPricingData } from "@/types";
@@ -229,15 +230,7 @@ export function CarDetailingApp() {
   if (loading) {
     return (
       <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4">
-        <div className="relative">
-          <div className="w-16 h-16 rounded-full border-4 border-red-600/20 border-t-red-600 animate-spin" />
-          <div className="absolute inset-0 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-red-500 animate-pulse" />
-          </div>
-        </div>
-        <p className="mt-4 text-sm font-semibold text-zinc-300 tracking-wider uppercase">
-          Loading AutoDrift Pricing Engine...
-        </p>
+        <RedSquareLoader text="Loading AutoDrift Pricing Engine..." />
       </div>
     );
   }
