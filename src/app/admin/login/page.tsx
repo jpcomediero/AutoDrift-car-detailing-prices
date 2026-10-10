@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Lock, Mail, ArrowRight, Loader2, AlertCircle } from "lucide-react";
 import { BrandLogo } from "@/components/common/BrandLogo";
 import Link from "next/link";
 
-export default function AdminLoginPage() {
+function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const nextUrl = searchParams.get("next") || "/admin";
@@ -49,6 +49,84 @@ export default function AdminLoginPage() {
   };
 
   return (
+    <div className="glass-card rounded-2xl p-7 border border-zinc-800 shadow-2xl">
+      {error && (
+        <div className="mb-5 p-3.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5">
+          <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+          <span className="leading-relaxed">{error}</span>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1.5">
+            Admin Email
+          </label>
+          <div className="relative">
+            <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="admin@autodrift.ph"
+              required
+              className="w-full pl-10 pr-4 py-3 bg-black/90 border border-zinc-700 focus:border-red-500 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-sm transition-all"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1.5">
+            Password
+          </label>
+          <div className="relative">
+            <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="••••••••••••"
+              required
+              className="w-full pl-10 pr-4 py-3 bg-black/90 border border-zinc-700 focus:border-red-500 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-sm transition-all"
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 disabled:opacity-50 shadow-[0_0_20px_rgba(239,68,68,0.4)] flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin text-white" />
+              <span>Verifying credentials...</span>
+            </>
+          ) : (
+            <>
+              <span>Sign In to Admin</span>
+              <ArrowRight className="w-4 h-4" />
+            </>
+          )}
+        </button>
+      </form>
+
+      {/* Quick Demo Helper */}
+      <div className="mt-6 pt-5 border-t border-zinc-800 text-center">
+        <button
+          type="button"
+          onClick={fillDemoCredentials}
+          className="text-xs text-red-400 hover:text-red-300 underline font-semibold"
+        >
+          Click here to fill standard admin credentials
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function AdminLoginPage() {
+  return (
     <div className="min-h-screen bg-[#050505] flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Brand Header */}
@@ -67,80 +145,17 @@ export default function AdminLoginPage() {
           </p>
         </div>
 
-        {/* Login Card */}
-        <div className="glass-card rounded-2xl p-7 border border-zinc-800 shadow-2xl">
-          {error && (
-            <div className="mb-5 p-3.5 rounded-xl bg-red-950/60 border border-red-500/40 text-red-200 text-xs flex items-start gap-2.5">
-              <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-              <span className="leading-relaxed">{error}</span>
+        {/* Suspense-wrapped form */}
+        <Suspense
+          fallback={
+            <div className="glass-card rounded-2xl p-12 border border-zinc-800 text-center flex items-center justify-center gap-2 text-zinc-400 text-sm">
+              <Loader2 className="w-5 h-5 animate-spin text-red-500" />
+              <span>Loading login...</span>
             </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1.5">
-                Admin Email
-              </label>
-              <div className="relative">
-                <Mail className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@autodrift.ph"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-black/90 border border-zinc-700 focus:border-red-500 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-sm transition-all"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-zinc-300 uppercase tracking-wider mb-1.5">
-                Password
-              </label>
-              <div className="relative">
-                <Lock className="w-4 h-4 text-zinc-500 absolute left-3.5 top-3.5" />
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••••••"
-                  required
-                  className="w-full pl-10 pr-4 py-3 bg-black/90 border border-zinc-700 focus:border-red-500 rounded-xl text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 text-sm transition-all"
-                />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full mt-2 py-3 px-4 rounded-xl font-bold text-sm text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 disabled:opacity-50 shadow-[0_0_20px_rgba(239,68,68,0.4)] flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
-            >
-              {isLoading ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin text-white" />
-                  <span>Verifying credentials...</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign In to Admin</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* Quick Demo Helper */}
-          <div className="mt-6 pt-5 border-t border-zinc-800 text-center">
-            <button
-              type="button"
-              onClick={fillDemoCredentials}
-              className="text-xs text-red-400 hover:text-red-300 underline font-semibold"
-            >
-              Click here to fill standard admin credentials
-            </button>
-          </div>
-        </div>
+          }
+        >
+          <LoginForm />
+        </Suspense>
 
         <div className="text-center mt-6">
           <Link
