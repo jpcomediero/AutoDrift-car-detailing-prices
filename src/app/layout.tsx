@@ -28,7 +28,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
-  themeColor: "#050505",
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -37,8 +37,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.className} bg-[#050505] text-zinc-100 antialiased selection:bg-red-600 selection:text-white`}>
+    <html lang="en" className="dark bg-black">
+      <body className={`${inter.className} bg-black text-zinc-100 antialiased selection:bg-red-600 selection:text-white min-h-screen`}>
         {children}
       </body>
     </html>

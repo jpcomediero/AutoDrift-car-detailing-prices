@@ -229,7 +229,7 @@ export function CarDetailingApp() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
         <RedSquareLoader text="Loading AutoDrift Pricing Engine..." />
       </div>
     );
@@ -240,10 +240,10 @@ export function CarDetailingApp() {
   const combos = data?.combos || [];
 
   return (
-    <div className="min-h-screen bg-[#050505] flex flex-col text-zinc-100">
+    <div className="min-h-screen bg-black flex flex-col text-zinc-100">
       {/* ============================================================== */}
       {/* BRAND TOP BAR */}
-      <header className="border-b border-zinc-800/80 bg-zinc-950/90 backdrop-blur-md sticky top-0 z-40">
+      <header className="border-b border-zinc-900/90 bg-black/95 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
           <BrandLogo showIcon={false} />
 

@@ -55,11 +55,11 @@ export default function AdminLayout({
 
   return (
     <ToastProvider>
-      <div className="min-h-screen bg-[#050505] text-zinc-100 flex flex-col md:flex-row">
+      <div className="min-h-screen bg-black text-zinc-100 flex flex-col md:flex-row">
       {/* ============================================================== */}
       {/* DESKTOP SIDEBAR                                                */}
       {/* ============================================================== */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#0a0a0a] border-r border-zinc-800/80 p-5 shrink-0 min-h-screen">
+      <aside className="hidden md:flex flex-col w-64 bg-black border-r border-zinc-900 p-5 shrink-0 min-h-screen">
         {/* Brand */}
         <div className="mb-8 px-2">
           <BrandLogo
@@ -85,7 +85,7 @@ export default function AdminLayout({
                 className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all duration-150 ${
                   isActive
                     ? "bg-red-600/15 text-red-400 border border-red-500/30 shadow-[0_0_12px_rgba(239,68,68,0.15)]"
-                    : "text-zinc-400 hover:text-white hover:bg-zinc-900 border border-transparent"
+                    : "text-zinc-400 hover:text-white hover:bg-zinc-900/80 border border-transparent"
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? "text-red-400" : "text-zinc-400"}`} />
@@ -96,7 +96,7 @@ export default function AdminLayout({
         </nav>
 
         {/* Footer Actions */}
-        <div className="pt-4 border-t border-zinc-800 space-y-2">
+        <div className="pt-4 border-t border-zinc-900 space-y-2">
           <Link
             href="/"
             target="_blank"
@@ -122,7 +122,7 @@ export default function AdminLayout({
       {/* ============================================================== */}
       {/* MOBILE TOP BAR & DRAWER                                        */}
       {/* ============================================================== */}
-      <div className="md:hidden bg-[#0a0a0a] border-b border-zinc-800 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
+      <div className="md:hidden bg-black border-b border-zinc-900 px-4 py-3 flex items-center justify-between sticky top-0 z-50">
         <BrandLogo
           showIcon={false}
           showBadge={false}
@@ -139,7 +139,7 @@ export default function AdminLayout({
       </div>
 
       {mobileMenuOpen && (
-        <div className="md:hidden bg-[#0a0a0a] border-b border-zinc-800 p-4 space-y-2 animate-in slide-in-from-top-2">
+        <div className="md:hidden bg-black border-b border-zinc-900 p-4 space-y-2 animate-in slide-in-from-top-2">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive =
